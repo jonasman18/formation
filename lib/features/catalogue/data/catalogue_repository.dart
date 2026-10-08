@@ -24,8 +24,11 @@ class CatalogueRepository {
   }
 
   Future<Formation> fetchById(String id) async {
-    final row =
-        await _client.from('formations').select(_cols).eq('id', id).single();
+    final row = await _client
+        .from('formations')
+        .select(_cols)
+        .eq('id', id)
+        .single();
     return Formation.fromMap(row);
   }
 
@@ -40,9 +43,10 @@ class CatalogueRepository {
   }
 
   Future<void> sInscrire(String formationId) async {
-    await _client
-        .from('inscriptions')
-        .insert({'formation_id': formationId, 'apprenant_id': _uid});
+    await _client.from('inscriptions').insert({
+      'formation_id': formationId,
+      'apprenant_id': _uid,
+    });
   }
 
   Future<List<MaFormation>> fetchMesFormations() async {

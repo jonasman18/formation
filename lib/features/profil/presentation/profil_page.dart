@@ -24,7 +24,10 @@ class ProfilPage extends ConsumerWidget {
           children: [
             const SizedBox(height: 8),
             const Center(
-              child: CircleAvatar(radius: 40, child: Icon(Icons.person, size: 40)),
+              child: CircleAvatar(
+                radius: 40,
+                child: Icon(Icons.person, size: 40),
+              ),
             ),
             const SizedBox(height: 16),
             Center(

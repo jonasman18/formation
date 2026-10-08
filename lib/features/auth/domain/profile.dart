@@ -16,16 +16,18 @@ class Profile {
   final String? avatarUrl;
 
   String get fullName {
-    final parts =
-        [prenom, nom].whereType<String>().where((s) => s.trim().isNotEmpty);
+    final parts = [
+      prenom,
+      nom,
+    ].whereType<String>().where((s) => s.trim().isNotEmpty);
     return parts.isEmpty ? 'Utilisateur' : parts.join(' ');
   }
 
   factory Profile.fromMap(Map<String, dynamic> m) => Profile(
-        id: m['id'] as String,
-        role: UserRole.fromString(m['role'] as String?),
-        nom: m['nom'] as String?,
-        prenom: m['prenom'] as String?,
-        avatarUrl: m['avatar_url'] as String?,
-      );
+    id: m['id'] as String,
+    role: UserRole.fromString(m['role'] as String?),
+    nom: m['nom'] as String?,
+    prenom: m['prenom'] as String?,
+    avatarUrl: m['avatar_url'] as String?,
+  );
 }

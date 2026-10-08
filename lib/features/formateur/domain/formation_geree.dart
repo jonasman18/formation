@@ -14,12 +14,12 @@ class FormationGeree {
   final String? categorieId;
 
   factory FormationGeree.fromMap(Map<String, dynamic> m) => FormationGeree(
-        id: m['id'] as String,
-        titre: m['titre'] as String,
-        statut: m['statut'] as String,
-        description: m['description'] as String?,
-        categorieId: m['categorie_id'] as String?,
-      );
+    id: m['id'] as String,
+    titre: m['titre'] as String,
+    statut: m['statut'] as String,
+    description: m['description'] as String?,
+    categorieId: m['categorie_id'] as String?,
+  );
 }
 
 class CategorieOption {
@@ -32,7 +32,7 @@ class CategorieOption {
 }
 
 String libelleStatut(String statut) => switch (statut) {
-      'publie' => 'Publiée',
-      'archive' => 'Archivée',
-      _ => 'Brouillon',
-    };
+  'publie' => 'Publiée',
+  'archive' => 'Archivée',
+  _ => 'Brouillon',
+};

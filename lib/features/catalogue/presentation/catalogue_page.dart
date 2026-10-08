@@ -16,10 +16,7 @@ class CataloguePage extends ConsumerWidget {
     final theme = Theme.of(context);
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Catalogue'),
-        
-      ),
+      appBar: AppBar(title: const Text('Catalogue')),
       body: AsyncBody<List<Formation>>(
         value: formations,
         onRetry: () => ref.invalidate(formationsPublieesProvider),
@@ -29,11 +26,16 @@ class CataloguePage extends ConsumerWidget {
             await ref.read(formationsPublieesProvider.future);
           },
           child: items.isEmpty
-              ? ListView(children: const [
-                  SizedBox(height: 160),
-                  Center(
-                      child: Text('Aucune formation disponible pour le moment.')),
-                ])
+              ? ListView(
+                  children: const [
+                    SizedBox(height: 160),
+                    Center(
+                      child: Text(
+                        'Aucune formation disponible pour le moment.',
+                      ),
+                    ),
+                  ],
+                )
               : ListView.separated(
                   padding: const EdgeInsets.all(16),
                   itemCount: items.length,

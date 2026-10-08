@@ -31,8 +31,9 @@ class CoursPage extends ConsumerWidget {
           final faites = terminees.asData?.value ?? <String>{};
           final toutes = [for (final m in items) ...m.lecons];
           final nbFaites = toutes.where((l) => faites.contains(l.id)).length;
-          final pct =
-              toutes.isEmpty ? 0 : (100 * nbFaites / toutes.length).round();
+          final pct = toutes.isEmpty
+              ? 0
+              : (100 * nbFaites / toutes.length).round();
 
           return ListView(
             padding: const EdgeInsets.all(16),
@@ -62,7 +63,7 @@ class CoursPage extends ConsumerWidget {
                           title: Text(l.titre),
                           trailing: const Icon(Icons.chevron_right),
                           onTap: () => context.go(
-                                                        '/catalogue/formation/$formationId/cours/lecon/${l.id}',
+                            '/catalogue/formation/$formationId/cours/lecon/${l.id}',
                           ),
                         ),
                       for (final q in m.quizzes)
@@ -75,7 +76,7 @@ class CoursPage extends ConsumerWidget {
                             '/catalogue/formation/$formationId/cours/quiz/${q.id}',
                           ),
                         ),
-                        for (final x in m.exercices)
+                      for (final x in m.exercices)
                         ListTile(
                           leading: const Icon(Icons.edit_note),
                           title: Text(x.titre),

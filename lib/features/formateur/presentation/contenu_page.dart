@@ -66,7 +66,9 @@ class ContenuPage extends ConsumerWidget {
     await _executer(
       context,
       ref,
-      () => ref.read(formateurRepositoryProvider).creerModule(
+      () => ref
+          .read(formateurRepositoryProvider)
+          .creerModule(
             formationId,
             titre,
             _suivant(modules.map((m) => m.ordre)),
@@ -105,11 +107,20 @@ class ContenuPage extends ConsumerWidget {
     );
   }
 
-  IconData _icone(TypeLecon t) => switch (t) {
-        TypeLecon.video => Icons.play_circle_outline,
-        TypeLecon.pdf => Icons.picture_as_pdf_outlined,
-        TypeLecon.texte => Icons.article_outlined,
-      };
+  IconData _icone(Lecon l) {
+    if (l.videos.isNotEmpty) return Icons.play_circle_outline;
+    if (l.pdfs.isNotEmpty) return Icons.picture_as_pdf_outlined;
+    return Icons.article_outlined;
+  }
+
+  String _resume(Lecon l) {
+    final p = <String>[
+      if (l.aTexte) 'texte',
+      if (l.videos.isNotEmpty) '${l.videos.length} vidéo(s)',
+      if (l.pdfs.isNotEmpty) '${l.pdfs.length} PDF',
+    ];
+    return p.isEmpty ? 'vide' : p.join(' · ');
+  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -151,7 +162,10 @@ class ContenuPage extends ConsumerWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       ListTile(
-                        title: Text(m.titre, style: theme.textTheme.titleMedium),
+                        title: Text(
+                          m.titre,
+                          style: theme.textTheme.titleMedium,
+                        ),
                         trailing: PopupMenuButton<String>(
                           onSelected: (v) {
                             if (v == 'renommer') _renommer(context, ref, m);
@@ -161,41 +175,82 @@ class ContenuPage extends ConsumerWidget {
                           },
                           itemBuilder: (_) => const [
                             PopupMenuItem(
-                                value: 'renommer', child: Text('Renommer')),
+                              value: 'renommer',
+                              child: Text('Renommer'),
+                            ),
                             PopupMenuItem(
-                                value: 'supprimer', child: Text('Supprimer')),
+                              value: 'supprimer',
+                              child: Text('Supprimer'),
+                            ),
                           ],
                         ),
                       ),
                       for (final l in m.lecons)
                         ListTile(
                           dense: true,
-                          leading: Icon(_icone(l.type)),
+                          leading: Icon(_icone(l)),
                           title: Text(l.titre),
+                          subtitle: Text(_resume(l)),
                           trailing: const Icon(Icons.edit_outlined, size: 18),
                           onTap: () => context.go(
                             '/formateur/formation/$formationId/contenu'
                             '/module/${m.id}/lecon/${l.id}',
                           ),
                         ),
-                      if (m.quizzes.isNotEmpty || m.exercices.isNotEmpty)
-                        Padding(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 16, vertical: 4),
-                          child: Text(
-                            '${m.quizzes.length} quiz · ${m.exercices.length} exercice(s)',
-                            style: theme.textTheme.bodySmall,
+                      for (final q in m.quizzes)
+                        ListTile(
+                          dense: true,
+                          leading: const Icon(Icons.quiz_outlined),
+                          title: Text(q.titre),
+                          subtitle: const Text('Quiz'),
+                          trailing: const Icon(Icons.edit_outlined, size: 18),
+                          onTap: () => context.go(
+                            '/formateur/formation/$formationId/contenu'
+                            '/module/${m.id}/quiz/${q.id}',
+                          ),
+                        ),
+                      for (final x in m.exercices)
+                        ListTile(
+                          dense: true,
+                          leading: const Icon(Icons.edit_note),
+                          title: Text(x.titre),
+                          subtitle: const Text('Exercice'),
+                          trailing: const Icon(Icons.edit_outlined, size: 18),
+                          onTap: () => context.go(
+                            '/formateur/formation/$formationId/contenu'
+                            '/module/${m.id}/exercice/${x.id}',
                           ),
                         ),
                       Padding(
                         padding: const EdgeInsets.fromLTRB(8, 0, 8, 8),
-                        child: TextButton.icon(
-                          onPressed: () => context.go(
-                            '/formateur/formation/$formationId/contenu'
-                            '/module/${m.id}/lecon/nouvelle',
-                          ),
-                          icon: const Icon(Icons.add),
-                          label: const Text('Ajouter une leçon'),
+                        child: Wrap(
+                          spacing: 4,
+                          children: [
+                            TextButton.icon(
+                              onPressed: () => context.go(
+                                '/formateur/formation/$formationId/contenu'
+                                '/module/${m.id}/lecon/nouvelle',
+                              ),
+                              icon: const Icon(Icons.add),
+                              label: const Text('Leçon'),
+                            ),
+                            TextButton.icon(
+                              onPressed: () => context.go(
+                                '/formateur/formation/$formationId/contenu'
+                                '/module/${m.id}/quiz/nouveau',
+                              ),
+                              icon: const Icon(Icons.quiz_outlined),
+                              label: const Text('Quiz'),
+                            ),
+                            TextButton.icon(
+                              onPressed: () => context.go(
+                                '/formateur/formation/$formationId/contenu'
+                                '/module/${m.id}/exercice/nouveau',
+                              ),
+                              icon: const Icon(Icons.edit_note),
+                              label: const Text('Exercice'),
+                            ),
+                          ],
                         ),
                       ),
                     ],
@@ -219,8 +274,9 @@ class _TitreDialog extends StatefulWidget {
 }
 
 class _TitreDialogState extends State<_TitreDialog> {
-  late final TextEditingController _controller =
-      TextEditingController(text: widget.initial);
+  late final TextEditingController _controller = TextEditingController(
+    text: widget.initial,
+  );
 
   @override
   void dispose() {

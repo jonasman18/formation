@@ -5,8 +5,9 @@ import '../../../core/supabase/supabase_providers.dart';
 import '../data/auth_repository.dart';
 import '../domain/profile.dart';
 
-final authRepositoryProvider =
-    Provider((ref) => AuthRepository(ref.watch(supabaseClientProvider)));
+final authRepositoryProvider = Provider(
+  (ref) => AuthRepository(ref.watch(supabaseClientProvider)),
+);
 
 final authStateProvider = StreamProvider<AuthState>(
   (ref) => ref.watch(supabaseClientProvider).auth.onAuthStateChange,

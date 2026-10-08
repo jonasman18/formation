@@ -18,6 +18,11 @@ import '../../features/quiz/presentation/quiz_page.dart';
 import '../../shared/widgets/learner_shell.dart';
 import '../../features/formateur/presentation/contenu_page.dart';
 import '../../features/formateur/presentation/lecon_form_page.dart';
+import '../../features/formateur/presentation/copies_page.dart';
+import '../../features/formateur/presentation/correction_page.dart';
+import '../../features/notifications/presentation/notifications_page.dart';
+import '../../features/formateur/presentation/exercice_edit_page.dart';
+import '../../features/formateur/presentation/quiz_edit_page.dart';
 
 /// Relance les redirections quand l'utilisateur se connecte ou se déconnecte.
 class _RouterRefresh extends ChangeNotifier {
@@ -63,9 +68,8 @@ final routerProvider = Provider<GoRouter>((ref) {
                 routes: [
                   GoRoute(
                     path: 'cours',
-                    builder: (_, state) => CoursPage(
-                      formationId: state.pathParameters['id']!,
-                    ),
+                    builder: (_, state) =>
+                        CoursPage(formationId: state.pathParameters['id']!),
                     routes: [
                       GoRoute(
                         path: 'lecon/:leconId',
@@ -107,17 +111,27 @@ final routerProvider = Provider<GoRouter>((ref) {
                 path: 'formation/nouvelle',
                 builder: (_, _) => const FormationFormPage(),
               ),
-                          GoRoute(
+              GoRoute(
+                path: 'copies',
+                builder: (_, _) => const CopiesPage(),
+                routes: [
+                  GoRoute(
+                    path: ':soumissionId',
+                    builder: (_, state) => CorrectionPage(
+                      soumissionId: state.pathParameters['soumissionId']!,
+                    ),
+                  ),
+                ],
+              ),
+              GoRoute(
                 path: 'formation/:id',
-                builder: (_, state) => FormationFormPage(
-                  formationId: state.pathParameters['id']!,
-                ),
+                builder: (_, state) =>
+                    FormationFormPage(formationId: state.pathParameters['id']!),
                 routes: [
                   GoRoute(
                     path: 'contenu',
-                    builder: (_, state) => ContenuPage(
-                      formationId: state.pathParameters['id']!,
-                    ),
+                    builder: (_, state) =>
+                        ContenuPage(formationId: state.pathParameters['id']!),
                     routes: [
                       // 'nouvelle' doit rester AVANT ':leconId'
                       GoRoute(
@@ -135,11 +149,45 @@ final routerProvider = Provider<GoRouter>((ref) {
                           leconId: state.pathParameters['leconId']!,
                         ),
                       ),
+                      GoRoute(
+                        path: 'module/:moduleId/quiz/nouveau',
+                        builder: (_, state) => QuizEditPage(
+                          formationId: state.pathParameters['id']!,
+                          moduleId: state.pathParameters['moduleId']!,
+                        ),
+                      ),
+                      GoRoute(
+                        path: 'module/:moduleId/quiz/:quizId',
+                        builder: (_, state) => QuizEditPage(
+                          formationId: state.pathParameters['id']!,
+                          moduleId: state.pathParameters['moduleId']!,
+                          quizId: state.pathParameters['quizId']!,
+                        ),
+                      ),
+                      GoRoute(
+                        path: 'module/:moduleId/exercice/nouveau',
+                        builder: (_, state) => ExerciceEditPage(
+                          formationId: state.pathParameters['id']!,
+                          moduleId: state.pathParameters['moduleId']!,
+                        ),
+                      ),
+                      GoRoute(
+                        path: 'module/:moduleId/exercice/:exerciceId',
+                        builder: (_, state) => ExerciceEditPage(
+                          formationId: state.pathParameters['id']!,
+                          moduleId: state.pathParameters['moduleId']!,
+                          exerciceId: state.pathParameters['exerciceId']!,
+                        ),
+                      ),
                     ],
                   ),
                 ],
               ),
             ],
+          ),
+          GoRoute(
+            path: '/notifications',
+            builder: (_, _) => const NotificationsPage(),
           ),
           GoRoute(path: '/profil', builder: (_, _) => const ProfilPage()),
         ],

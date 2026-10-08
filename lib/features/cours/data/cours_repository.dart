@@ -17,7 +17,8 @@ class CoursRepository {
     final rows = await _client
         .from('modules')
         .select(
-            'id, titre, ordre, lecons(id, titre, type, contenu, url, duree_sec, ordre), quiz(id, titre), exercices(id, titre)')
+          'id, titre, ordre, lecons(id, titre, type, contenu, url, duree_sec, ordre, ressources(id, type, titre, url, ordre)), quiz(id, titre), exercices(id, titre)',
+        )
         .eq('formation_id', formationId)
         .order('ordre');
     return rows.map(Module.fromMap).toList();
@@ -34,9 +35,10 @@ class CoursRepository {
 
   Future<void> marquerTerminee(String leconId) async {
     try {
-      await _client
-          .from('progression_lecons')
-          .insert({'apprenant_id': _uid, 'lecon_id': leconId});
+      await _client.from('progression_lecons').insert({
+        'apprenant_id': _uid,
+        'lecon_id': leconId,
+      });
     } on PostgrestException catch (e) {
       if (e.code != '23505') rethrow; // 23505 = déjà terminée
     }

@@ -34,14 +34,15 @@ class _ExercicePageState extends ConsumerState<ExercicePage> {
   String _date(DateTime d) =>
       '${d.day.toString().padLeft(2, '0')}/${d.month.toString().padLeft(2, '0')}/${d.year}';
 
-  String _note(double n) =>
-      '${n.toStringAsFixed(n % 1 == 0 ? 0 : 2)} / 20';
+  String _note(double n) => '${n.toStringAsFixed(n % 1 == 0 ? 0 : 2)} / 20';
 
   Future<void> _envoyer() async {
     final texte = _controller.text.trim();
     if (texte.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Écrivez votre réponse avant d\'envoyer.')),
+        const SnackBar(
+          content: Text('Écrivez votre réponse avant d\'envoyer.'),
+        ),
       );
       return;
     }
@@ -101,13 +102,14 @@ class _ExercicePageState extends ConsumerState<ExercicePage> {
           Text(
             'À rendre avant le ${_date(e.dateLimite!)}'
             '${enRetard ? ' (date dépassée)' : ''}',
-            style: TextStyle(
-              color: enRetard ? theme.colorScheme.error : null,
-            ),
+            style: TextStyle(color: enRetard ? theme.colorScheme.error : null),
           ),
         ],
         const SizedBox(height: 16),
-        Text(e.consigne ?? 'Aucune consigne.', style: theme.textTheme.bodyLarge),
+        Text(
+          e.consigne ?? 'Aucune consigne.',
+          style: theme.textTheme.bodyLarge,
+        ),
         const SizedBox(height: 24),
         const Divider(),
         const SizedBox(height: 16),
@@ -117,36 +119,36 @@ class _ExercicePageState extends ConsumerState<ExercicePage> {
   }
 
   List<Widget> _formulaire(Soumission? s) => [
-        Text('Votre réponse', style: Theme.of(context).textTheme.titleMedium),
-        const SizedBox(height: 8),
-        TextField(
-          controller: _controller,
-          minLines: 6,
-          maxLines: 14,
-          textCapitalization: TextCapitalization.sentences,
-          decoration: const InputDecoration(
-            border: OutlineInputBorder(),
-            hintText: 'Écrivez votre réponse ici…',
-          ),
-        ),
-        const SizedBox(height: 16),
-        FilledButton.icon(
-          onPressed: _busy ? null : _envoyer,
-          icon: _busy
-              ? const SizedBox(
-                  height: 18,
-                  width: 18,
-                  child: CircularProgressIndicator(strokeWidth: 2),
-                )
-              : const Icon(Icons.send),
-          label: Text(s == null ? 'Envoyer' : 'Enregistrer les modifications'),
-        ),
-        if (s != null)
-          TextButton(
-            onPressed: _busy ? null : () => setState(() => _edition = false),
-            child: const Text('Annuler'),
-          ),
-      ];
+    Text('Votre réponse', style: Theme.of(context).textTheme.titleMedium),
+    const SizedBox(height: 8),
+    TextField(
+      controller: _controller,
+      minLines: 6,
+      maxLines: 14,
+      textCapitalization: TextCapitalization.sentences,
+      decoration: const InputDecoration(
+        border: OutlineInputBorder(),
+        hintText: 'Écrivez votre réponse ici…',
+      ),
+    ),
+    const SizedBox(height: 16),
+    FilledButton.icon(
+      onPressed: _busy ? null : _envoyer,
+      icon: _busy
+          ? const SizedBox(
+              height: 18,
+              width: 18,
+              child: CircularProgressIndicator(strokeWidth: 2),
+            )
+          : const Icon(Icons.send),
+      label: Text(s == null ? 'Envoyer' : 'Enregistrer les modifications'),
+    ),
+    if (s != null)
+      TextButton(
+        onPressed: _busy ? null : () => setState(() => _edition = false),
+        child: const Text('Annuler'),
+      ),
+  ];
 
   List<Widget> _lecture(Soumission s) {
     final theme = Theme.of(context);
@@ -168,16 +170,16 @@ class _ExercicePageState extends ConsumerState<ExercicePage> {
       Card(
         child: Padding(
           padding: const EdgeInsets.all(16),
-          child: SizedBox(
-            width: double.infinity,
-            child: Text(s.contenu ?? ''),
-          ),
+          child: SizedBox(width: double.infinity, child: Text(s.contenu ?? '')),
         ),
       ),
       if (s.corrigee) ...[
         const SizedBox(height: 16),
         if (s.note != null)
-          Text('Note : ${_note(s.note!)}', style: theme.textTheme.headlineSmall),
+          Text(
+            'Note : ${_note(s.note!)}',
+            style: theme.textTheme.headlineSmall,
+          ),
         if ((s.commentaire ?? '').isNotEmpty) ...[
           const SizedBox(height: 8),
           Text('Commentaire du formateur', style: theme.textTheme.titleSmall),

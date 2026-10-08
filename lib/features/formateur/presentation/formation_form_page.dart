@@ -81,7 +81,7 @@ class _FormationFormState extends ConsumerState<_FormationForm> {
     ref.invalidate(formationProvider);
   }
 
-   Future<void> _enregistrer() async {
+  Future<void> _enregistrer() async {
     if (!_formKey.currentState!.validate()) return;
     final router = GoRouter.of(context);
     final messenger = ScaffoldMessenger.of(context);
@@ -109,9 +109,13 @@ class _FormationFormState extends ConsumerState<_FormationForm> {
       }
       _rafraichir();
       if (nouvelId != null) {
-        messenger.showSnackBar(const SnackBar(
-          content: Text('Formation créée. Ajoutez maintenant vos modules et leçons.'),
-        ));
+        messenger.showSnackBar(
+          const SnackBar(
+            content: Text(
+              'Formation créée. Ajoutez maintenant vos modules et leçons.',
+            ),
+          ),
+        );
         router.go('/formateur/formation/$nouvelId');
       } else {
         router.go('/formateur');
@@ -151,7 +155,7 @@ class _FormationFormState extends ConsumerState<_FormationForm> {
     try {
       await ref.read(formateurRepositoryProvider).supprimer(widget.initial!.id);
       _rafraichir();
-        router.go('/formateur');
+      router.go('/formateur');
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context)
@@ -177,8 +181,9 @@ class _FormationFormState extends ConsumerState<_FormationForm> {
               border: OutlineInputBorder(),
             ),
             textCapitalization: TextCapitalization.sentences,
-            validator: (v) =>
-                (v == null || v.trim().isEmpty) ? 'Le titre est obligatoire' : null,
+            validator: (v) => (v == null || v.trim().isEmpty)
+                ? 'Le titre est obligatoire'
+                : null,
           ),
           const SizedBox(height: 16),
           TextFormField(
@@ -222,7 +227,7 @@ class _FormationFormState extends ConsumerState<_FormationForm> {
             style: theme.textTheme.bodySmall,
           ),
           const SizedBox(height: 24),
-                    if (widget.initial == null)
+          if (widget.initial == null)
             Padding(
               padding: const EdgeInsets.only(bottom: 12),
               child: Text(
@@ -240,13 +245,14 @@ class _FormationFormState extends ConsumerState<_FormationForm> {
                   )
                 : const Text('Enregistrer'),
           ),
-                    if (widget.initial != null) ...[
+          if (widget.initial != null) ...[
             const SizedBox(height: 8),
             OutlinedButton.icon(
               onPressed: _busy
                   ? null
                   : () => context.go(
-                      '/formateur/formation/${widget.initial!.id}/contenu'),
+                      '/formateur/formation/${widget.initial!.id}/contenu',
+                    ),
               icon: const Icon(Icons.library_books_outlined),
               label: const Text('Gérer les modules et leçons'),
             ),

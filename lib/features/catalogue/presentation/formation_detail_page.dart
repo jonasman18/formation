@@ -5,6 +5,7 @@ import '../../../shared/utils/errors.dart';
 import '../../../shared/widgets/async_body.dart';
 import '../domain/formation.dart';
 import 'catalogue_providers.dart';
+
 import 'package:go_router/go_router.dart';
 
 class FormationDetailPage extends ConsumerStatefulWidget {
@@ -66,9 +67,10 @@ class _FormationDetailPageState extends ConsumerState<FormationDetailPage> {
             inscrit.when(
               loading: () => const Center(child: CircularProgressIndicator()),
               error: (e, _) => Text(humanError(e)),
-                data: (dejaInscrit) => dejaInscrit
+              data: (dejaInscrit) => dejaInscrit
                   ? FilledButton.icon(
-                      onPressed: () => context.go('/catalogue/formation/$id/cours'),
+                      onPressed: () =>
+                          context.go('/catalogue/formation/$id/cours'),
                       icon: const Icon(Icons.play_arrow),
                       label: const Text('Accéder au cours'),
                     )

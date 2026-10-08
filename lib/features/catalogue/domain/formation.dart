@@ -14,13 +14,12 @@ class Formation {
   final String? categorie;
 
   factory Formation.fromMap(Map<String, dynamic> m) => Formation(
-        id: m['id'] as String,
-        titre: m['titre'] as String,
-        description: m['description'] as String?,
-        imageUrl: m['image_url'] as String?,
-        categorie:
-            (m['categories'] as Map<String, dynamic>?)?['nom'] as String?,
-      );
+    id: m['id'] as String,
+    titre: m['titre'] as String,
+    description: m['description'] as String?,
+    imageUrl: m['image_url'] as String?,
+    categorie: (m['categories'] as Map<String, dynamic>?)?['nom'] as String?,
+  );
 }
 
 /// Formation suivie par l'apprenant, avec son pourcentage de progression.

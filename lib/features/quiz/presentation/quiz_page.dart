@@ -99,11 +99,14 @@ class _QuizPageState extends ConsumerState<QuizPage> {
                     CheckboxListTile(
                       controlAffinity: ListTileControlAffinity.leading,
                       title: Text(c.texte),
-                      value: (_reponses[quiz.questions[i].id] ?? {})
-                          .contains(c.id),
+                      value: (_reponses[quiz.questions[i].id] ?? {}).contains(
+                        c.id,
+                      ),
                       onChanged: (v) => setState(() {
                         final set = _reponses.putIfAbsent(
-                            quiz.questions[i].id, () => <String>{});
+                          quiz.questions[i].id,
+                          () => <String>{},
+                        );
                         if (v == true) {
                           set.add(c.id);
                         } else {
@@ -144,8 +147,10 @@ class _QuizPageState extends ConsumerState<QuizPage> {
         ),
         const SizedBox(height: 16),
         Center(
-          child: Text('${r.score} %',
-              style: theme.textTheme.displayMedium?.copyWith(color: couleur)),
+          child: Text(
+            '${r.score} %',
+            style: theme.textTheme.displayMedium?.copyWith(color: couleur),
+          ),
         ),
         const SizedBox(height: 8),
         Center(
@@ -162,10 +167,7 @@ class _QuizPageState extends ConsumerState<QuizPage> {
           ),
         ),
         const SizedBox(height: 32),
-        FilledButton(
-          onPressed: _recommencer,
-          child: const Text('Recommencer'),
-        ),
+        FilledButton(onPressed: _recommencer, child: const Text('Recommencer')),
         const SizedBox(height: 8),
         OutlinedButton(
           onPressed: () =>

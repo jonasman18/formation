@@ -72,15 +72,26 @@ class _LeconPageState extends ConsumerState<LeconPage> {
             children: [
               Text(lecon.titre, style: theme.textTheme.headlineSmall),
               const SizedBox(height: 16),
-              if (lecon.type == TypeLecon.texte)
-                Text(
-                  lecon.contenu ?? 'Aucun contenu.',
-                  style: theme.textTheme.bodyLarge,
-                )
-                else if (lecon.type == TypeLecon.video)
-                VideoLecon(key: ValueKey(lecon.id), chemin: lecon.url)
-              else
-                PdfLecon(chemin: lecon.url),
+              if (lecon.aTexte)
+                Text(lecon.contenu!, style: theme.textTheme.bodyLarge),
+              for (final v in lecon.videos) ...[
+                const SizedBox(height: 20),
+                Text(v.nom, style: theme.textTheme.titleSmall),
+                const SizedBox(height: 8),
+                VideoLecon(key: ValueKey(v.id), chemin: v.url),
+              ],
+              if (lecon.pdfs.isNotEmpty) ...[
+                const SizedBox(height: 20),
+                Text('Documents', style: theme.textTheme.titleMedium),
+                const SizedBox(height: 8),
+                for (final p in lecon.pdfs)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 8),
+                    child: PdfLecon(chemin: p.url, nom: p.nom),
+                  ),
+              ],
+              if (!lecon.aTexte && lecon.ressources.isEmpty)
+                const Text('Aucun contenu pour le moment.'),
               const SizedBox(height: 32),
               if (terminee)
                 const FilledButton.tonal(

@@ -37,17 +37,22 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
       _error = null;
     });
     try {
-      final sessionOuverte = await ref.read(authRepositoryProvider).signUp(
+      final sessionOuverte = await ref
+          .read(authRepositoryProvider)
+          .signUp(
             email: _email.text.trim(),
             password: _password.text,
             nom: _nom.text.trim(),
             prenom: _prenom.text.trim(),
           );
       if (!sessionOuverte && mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-          content: Text(
-              'Compte créé. Vérifiez votre e-mail pour confirmer votre inscription.'),
-        ));
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              'Compte créé. Vérifiez votre e-mail pour confirmer votre inscription.',
+            ),
+          ),
+        );
         context.go('/login');
       }
       // Si la session est ouverte, le routeur redirige automatiquement.
@@ -106,7 +111,8 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                       controller: _password,
                       obscureText: true,
                       decoration: const InputDecoration(
-                          labelText: 'Mot de passe (8 caractères min.)'),
+                        labelText: 'Mot de passe (8 caractères min.)',
+                      ),
                       validator: (v) => (v == null || v.length < 8)
                           ? '8 caractères minimum'
                           : null,
@@ -117,7 +123,8 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                       Text(
                         _error!,
                         style: TextStyle(
-                            color: Theme.of(context).colorScheme.error),
+                          color: Theme.of(context).colorScheme.error,
+                        ),
                       ),
                     ],
                     const SizedBox(height: 24),
@@ -127,8 +134,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                           ? const SizedBox(
                               height: 20,
                               width: 20,
-                              child:
-                                  CircularProgressIndicator(strokeWidth: 2),
+                              child: CircularProgressIndicator(strokeWidth: 2),
                             )
                           : const Text('S’inscrire'),
                     ),

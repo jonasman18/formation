@@ -29,8 +29,11 @@ class AuthRepository {
   Future<void> signOut() => _client.auth.signOut();
 
   Future<Profile?> fetchProfile(String userId) async {
-    final row =
-        await _client.from('profiles').select().eq('id', userId).maybeSingle();
+    final row = await _client
+        .from('profiles')
+        .select()
+        .eq('id', userId)
+        .maybeSingle();
     return row == null ? null : Profile.fromMap(row);
   }
 }

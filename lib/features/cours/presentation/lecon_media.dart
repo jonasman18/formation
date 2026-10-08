@@ -18,8 +18,9 @@ Future<String> _urlSignee(WidgetRef ref, String chemin) async {
 }
 
 class PdfLecon extends ConsumerStatefulWidget {
-  const PdfLecon({super.key, required this.chemin});
+  const PdfLecon({super.key, required this.chemin, this.nom});
   final String? chemin;
+  final String? nom;
 
   @override
   ConsumerState<PdfLecon> createState() => _PdfLeconState();
@@ -64,7 +65,7 @@ class _PdfLeconState extends ConsumerState<PdfLecon> {
                 child: CircularProgressIndicator(strokeWidth: 2),
               )
             : const Icon(Icons.picture_as_pdf),
-        label: const Text('Ouvrir le document PDF'),
+        label: Text(widget.nom ?? 'Ouvrir le document PDF'),
       ),
     );
   }

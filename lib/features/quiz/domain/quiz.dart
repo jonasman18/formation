@@ -21,13 +21,13 @@ class Question {
   final List<Choix> choix;
 
   factory Question.fromMap(Map<String, dynamic> m) => Question(
-        id: m['id'] as String,
-        enonce: m['enonce'] as String,
-        ordre: (m['ordre'] as num?)?.toInt() ?? 0,
-        choix: ((m['choix'] as List?) ?? [])
-            .map((e) => Choix.fromMap(e as Map<String, dynamic>))
-            .toList(),
-      );
+    id: m['id'] as String,
+    enonce: m['enonce'] as String,
+    ordre: (m['ordre'] as num?)?.toInt() ?? 0,
+    choix: ((m['choix'] as List?) ?? [])
+        .map((e) => Choix.fromMap(e as Map<String, dynamic>))
+        .toList(),
+  );
 }
 
 class Quiz {
@@ -44,10 +44,11 @@ class Quiz {
   final List<Question> questions;
 
   factory Quiz.fromMap(Map<String, dynamic> m) {
-    final questions = ((m['questions'] as List?) ?? [])
-        .map((e) => Question.fromMap(e as Map<String, dynamic>))
-        .toList()
-      ..sort((a, b) => a.ordre.compareTo(b.ordre));
+    final questions =
+        ((m['questions'] as List?) ?? [])
+            .map((e) => Question.fromMap(e as Map<String, dynamic>))
+            .toList()
+          ..sort((a, b) => a.ordre.compareTo(b.ordre));
     return Quiz(
       id: m['id'] as String,
       titre: m['titre'] as String,
@@ -71,9 +72,9 @@ class QuizResultat {
   final int total;
 
   factory QuizResultat.fromMap(Map<String, dynamic> m) => QuizResultat(
-        score: (m['score'] as num).toInt(),
-        reussi: m['reussi'] as bool,
-        bonnes: (m['bonnes'] as num).toInt(),
-        total: (m['total'] as num).toInt(),
-      );
+    score: (m['score'] as num).toInt(),
+    reussi: m['reussi'] as bool,
+    bonnes: (m['bonnes'] as num).toInt(),
+    total: (m['total'] as num).toInt(),
+  );
 }

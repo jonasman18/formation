@@ -49,21 +49,27 @@ class MesFormationsPage extends ConsumerWidget {
                     return Card(
                       clipBehavior: Clip.antiAlias,
                       child: InkWell(
-                        onTap: () => context
-                            .go('/catalogue/formation/${m.formation.id}/cours'),
+                        onTap: () => context.go(
+                          '/catalogue/formation/${m.formation.id}/cours',
+                        ),
                         child: Padding(
                           padding: const EdgeInsets.all(16),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(m.formation.titre,
-                                  style: theme.textTheme.titleMedium),
+                              Text(
+                                m.formation.titre,
+                                style: theme.textTheme.titleMedium,
+                              ),
                               const SizedBox(height: 12),
                               LinearProgressIndicator(
-                                  value: m.pourcentage / 100),
+                                value: m.pourcentage / 100,
+                              ),
                               const SizedBox(height: 4),
-                              Text('${m.pourcentage} % terminé',
-                                  style: theme.textTheme.labelMedium),
+                              Text(
+                                '${m.pourcentage} % terminé',
+                                style: theme.textTheme.labelMedium,
+                              ),
                             ],
                           ),
                         ),

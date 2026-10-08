@@ -29,14 +29,11 @@ class ExercicesRepository {
 
   /// Dépose ou remplace ma copie (possible tant qu'elle n'est pas corrigée : RLS).
   Future<void> soumettre(String exerciceId, String contenu) async {
-    await _client.from('soumissions').upsert(
-      {
-        'exercice_id': exerciceId,
-        'apprenant_id': _client.auth.currentUser!.id,
-        'contenu': contenu,
-        'soumis_at': DateTime.now().toUtc().toIso8601String(),
-      },
-      onConflict: 'exercice_id,apprenant_id',
-    );
+    await _client.from('soumissions').upsert({
+      'exercice_id': exerciceId,
+      'apprenant_id': _client.auth.currentUser!.id,
+      'contenu': contenu,
+      'soumis_at': DateTime.now().toUtc().toIso8601String(),
+    }, onConflict: 'exercice_id,apprenant_id');
   }
 }

@@ -83,8 +83,9 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                       controller: _password,
                       obscureText: true,
                       autofillHints: const [AutofillHints.password],
-                      decoration:
-                          const InputDecoration(labelText: 'Mot de passe'),
+                      decoration: const InputDecoration(
+                        labelText: 'Mot de passe',
+                      ),
                       validator: (v) => (v == null || v.isEmpty)
                           ? 'Mot de passe requis'
                           : null,
@@ -95,7 +96,8 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                       Text(
                         _error!,
                         style: TextStyle(
-                            color: Theme.of(context).colorScheme.error),
+                          color: Theme.of(context).colorScheme.error,
+                        ),
                       ),
                     ],
                     const SizedBox(height: 24),
@@ -105,8 +107,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                           ? const SizedBox(
                               height: 20,
                               width: 20,
-                              child:
-                                  CircularProgressIndicator(strokeWidth: 2),
+                              child: CircularProgressIndicator(strokeWidth: 2),
                             )
                           : const Text('Se connecter'),
                     ),

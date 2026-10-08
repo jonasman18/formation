@@ -14,7 +14,16 @@ class FormateurPage extends ConsumerWidget {
     final formations = ref.watch(formationsGereesProvider);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Espace formateur')),
+      appBar: AppBar(
+        title: const Text('Espace formateur'),
+        actions: [
+          IconButton(
+            tooltip: 'Copies à corriger',
+            icon: const Icon(Icons.rate_review_outlined),
+            onPressed: () => context.go('/formateur/copies'),
+          ),
+        ],
+      ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => context.go('/formateur/formation/nouvelle'),
         icon: const Icon(Icons.add),
@@ -32,7 +41,9 @@ class FormateurPage extends ConsumerWidget {
               ? ListView(
                   children: const [
                     SizedBox(height: 120),
-                    Center(child: Text('Vous n\'avez pas encore de formation.')),
+                    Center(
+                      child: Text('Vous n\'avez pas encore de formation.'),
+                    ),
                   ],
                 )
               : ListView.builder(
@@ -45,9 +56,7 @@ class FormateurPage extends ConsumerWidget {
                         title: Text(f.titre),
                         subtitle: Text(libelleStatut(f.statut)),
                         leading: Icon(
-                          f.statut == 'publie'
-                              ? Icons.public
-                              : Icons.edit_note,
+                          f.statut == 'publie' ? Icons.public : Icons.edit_note,
                         ),
                         trailing: const Icon(Icons.chevron_right),
                         onTap: () => context.go('/formateur/formation/${f.id}'),

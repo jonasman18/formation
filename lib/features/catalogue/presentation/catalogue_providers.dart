@@ -1,12 +1,14 @@
 import '../../auth/presentation/auth_providers.dart';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/supabase/supabase_providers.dart';
 import '../data/catalogue_repository.dart';
 import '../domain/formation.dart';
 
-final catalogueRepositoryProvider =
-    Provider((ref) => CatalogueRepository(ref.watch(supabaseClientProvider)));
+final catalogueRepositoryProvider = Provider(
+  (ref) => CatalogueRepository(ref.watch(supabaseClientProvider)),
+);
 
 final formationsPublieesProvider = FutureProvider<List<Formation>>(
   (ref) => ref.watch(catalogueRepositoryProvider).fetchPubliees(),
@@ -22,8 +24,9 @@ final inscritProvider = FutureProvider.family<bool, String>((ref, formationId) {
 });
 
 /// autoDispose : les données sont rechargées chaque fois qu'on rouvre l'onglet.
-final mesFormationsProvider =
-    FutureProvider.autoDispose<List<MaFormation>>((ref) {
+final mesFormationsProvider = FutureProvider.autoDispose<List<MaFormation>>((
+  ref,
+) {
   ref.watch(currentUserIdProvider);
   return ref.watch(catalogueRepositoryProvider).fetchMesFormations();
 });

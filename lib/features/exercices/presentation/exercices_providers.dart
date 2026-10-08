@@ -13,8 +13,8 @@ final exerciceProvider = FutureProvider.autoDispose.family<Exercice, String>(
   (ref, id) => ref.watch(exercicesRepositoryProvider).fetchExercice(id),
 );
 
-final maSoumissionProvider =
-    FutureProvider.autoDispose.family<Soumission?, String>((ref, id) {
-  ref.watch(currentUserIdProvider); // se recharge si on change de compte
-  return ref.watch(exercicesRepositoryProvider).fetchMaSoumission(id);
-});
+final maSoumissionProvider = FutureProvider.autoDispose
+    .family<Soumission?, String>((ref, id) {
+      ref.watch(currentUserIdProvider); // se recharge si on change de compte
+      return ref.watch(exercicesRepositoryProvider).fetchMaSoumission(id);
+    });

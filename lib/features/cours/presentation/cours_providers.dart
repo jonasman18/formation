@@ -5,8 +5,9 @@ import '../../auth/presentation/auth_providers.dart';
 import '../data/cours_repository.dart';
 import '../domain/cours.dart';
 
-final coursRepositoryProvider =
-    Provider((ref) => CoursRepository(ref.watch(supabaseClientProvider)));
+final coursRepositoryProvider = Provider(
+  (ref) => CoursRepository(ref.watch(supabaseClientProvider)),
+);
 
 final modulesProvider = FutureProvider.family<List<Module>, String>(
   (ref, formationId) =>
