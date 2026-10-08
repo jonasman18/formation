@@ -25,6 +25,7 @@ class Soumission {
   const Soumission({
     required this.id,
     this.contenu,
+    this.fichierPath,
     this.note,
     this.commentaire,
     this.corrigeAt,
@@ -32,6 +33,7 @@ class Soumission {
 
   final String id;
   final String? contenu;
+  final String? fichierPath;
   final double? note;
   final String? commentaire;
   final DateTime? corrigeAt;
@@ -41,6 +43,7 @@ class Soumission {
   factory Soumission.fromMap(Map<String, dynamic> m) => Soumission(
     id: m['id'] as String,
     contenu: m['contenu'] as String?,
+    fichierPath: m['fichier_path'] as String?,
     note: (m['note'] as num?)?.toDouble(),
     commentaire: m['commentaire'] as String?,
     corrigeAt: m['corrige_at'] == null

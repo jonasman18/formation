@@ -3,8 +3,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../shared/utils/errors.dart';
+import '../../../shared/utils/pick_file.dart';
 import '../../../shared/widgets/async_body.dart';
+import '../../../shared/widgets/fichier_tile.dart';
 import '../../cours/presentation/cours_providers.dart';
+import '../../exercices/data/exercice_fichiers.dart';
 import '../../exercices/domain/exercice.dart';
 import '../../exercices/presentation/exercices_providers.dart';
 import 'formateur_providers.dart';
@@ -116,23 +119,68 @@ class _ExerciceFormState extends ConsumerState<_ExerciceForm> {
     setState(() => _busy = true);
     try {
       if (widget.initial == null) {
-        await repo.creerExercice(
+        final id = await repo.creerExercice(
           moduleId: widget.moduleId,
           titre: _titre.text.trim(),
           consigne: consigne.isEmpty ? null : consigne,
           dateLimite: _limite,
         );
-      } else {
-        await repo.modifierExercice(
-          widget.initial!.id,
-          titre: _titre.text.trim(),
-          consigne: consigne.isEmpty ? null : consigne,
-          dateLimite: _limite,
-        );
+        ref.invalidate(modulesProvider(widget.formationId));
+        ref.invalidate(exerciceProvider);
+        _msg('Exercice créé. Vous pouvez maintenant joindre des PDF.');
+        // on reste sur l'exercice pour pouvoir y ajouter des documents
+        router.go('$_retour/module/${widget.moduleId}/exercice/$id');
+        return;
       }
+      await repo.modifierExercice(
+        widget.initial!.id,
+        titre: _titre.text.trim(),
+        consigne: consigne.isEmpty ? null : consigne,
+        dateLimite: _limite,
+      );
       ref.invalidate(modulesProvider(widget.formationId));
       ref.invalidate(exerciceProvider);
       router.go(_retour);
+    } catch (e) {
+      _msg(humanError(e));
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
+  Future<void> _ajouterPdf() async {
+    final f = await choisirFichier(extensions: ['pdf']);
+    if (f == null || !mounted) return;
+    if (f.octets.length > tailleMaxOctets) {
+      _msg('Fichier trop volumineux (20 Mo maximum).');
+      return;
+    }
+    final id = widget.initial!.id;
+    final repo = ref.read(exerciceFichiersRepositoryProvider);
+
+    setState(() => _busy = true);
+    try {
+      await repo.ajouterConsigne(
+        formationId: widget.formationId,
+        exerciceId: id,
+        nom: f.nom,
+        octets: f.octets,
+      );
+      ref.invalidate(consignesProvider(id));
+    } catch (e) {
+      _msg(humanError(e));
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
+  Future<void> _retirerPdf(FichierJoint f) async {
+    final repo = ref.read(exerciceFichiersRepositoryProvider);
+    final id = widget.initial!.id;
+    setState(() => _busy = true);
+    try {
+      await repo.supprimerConsigne(f);
+      ref.invalidate(consignesProvider(id));
     } catch (e) {
       _msg(humanError(e));
     } finally {
@@ -164,9 +212,19 @@ class _ExerciceFormState extends ConsumerState<_ExerciceForm> {
 
     final router = GoRouter.of(context);
     final repo = ref.read(formateurRepositoryProvider);
+    final fichiersRepo = ref.read(exerciceFichiersRepositoryProvider);
+    final id = widget.initial!.id;
+    final joints = ref.read(consignesProvider(id)).asData?.value ?? const [];
+
     setState(() => _busy = true);
     try {
-      await repo.supprimerExercice(widget.initial!.id);
+      await repo.supprimerExercice(id);
+      for (final f in joints) {
+        await fichiersRepo.supprimerFichierStockage(
+          ExerciceFichiersRepository.bucketConsignes,
+          f.chemin,
+        );
+      }
       ref.invalidate(modulesProvider(widget.formationId));
       ref.invalidate(exerciceProvider);
       router.go(_retour);
@@ -175,6 +233,43 @@ class _ExerciceFormState extends ConsumerState<_ExerciceForm> {
     } finally {
       if (mounted) setState(() => _busy = false);
     }
+  }
+
+  Widget _documents() {
+    final theme = Theme.of(context);
+    final id = widget.initial!.id;
+    final liste =
+        ref.watch(consignesProvider(id)).asData?.value ??
+        const <FichierJoint>[];
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text('Documents joints (PDF)', style: theme.textTheme.titleSmall),
+        const SizedBox(height: 4),
+        if (liste.isEmpty)
+          Text('Aucun document.', style: theme.textTheme.bodySmall),
+        for (final f in liste)
+          Card(
+            child: FichierTile(
+              bucket: ExerciceFichiersRepository.bucketConsignes,
+              chemin: f.chemin,
+              nom: f.titre,
+              trailing: IconButton(
+                tooltip: 'Retirer',
+                icon: const Icon(Icons.delete_outline),
+                onPressed: _busy ? null : () => _retirerPdf(f),
+              ),
+            ),
+          ),
+        const SizedBox(height: 4),
+        OutlinedButton.icon(
+          onPressed: _busy ? null : _ajouterPdf,
+          icon: const Icon(Icons.picture_as_pdf_outlined),
+          label: const Text('Ajouter un PDF'),
+        ),
+      ],
+    );
   }
 
   @override
@@ -230,6 +325,14 @@ class _ExerciceFormState extends ConsumerState<_ExerciceForm> {
                 ),
             ],
           ),
+          const SizedBox(height: 16),
+          if (widget.initial != null)
+            _documents()
+          else
+            Text(
+              'Vous pourrez joindre des PDF juste après la création.',
+              style: theme.textTheme.bodySmall,
+            ),
           const SizedBox(height: 24),
           FilledButton(
             onPressed: _busy ? null : _enregistrer,
@@ -239,7 +342,11 @@ class _ExerciceFormState extends ConsumerState<_ExerciceForm> {
                     width: 20,
                     child: CircularProgressIndicator(strokeWidth: 2),
                   )
-                : const Text('Enregistrer'),
+                : Text(
+                    widget.initial == null
+                        ? 'Créer l\'exercice'
+                        : 'Enregistrer',
+                  ),
           ),
           if (widget.initial != null) ...[
             const SizedBox(height: 8),

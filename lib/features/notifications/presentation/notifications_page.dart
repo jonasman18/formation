@@ -5,6 +5,7 @@ import '../../../shared/utils/errors.dart';
 import '../../../shared/widgets/async_body.dart';
 import '../domain/app_notification.dart';
 import 'notifications_providers.dart';
+import '../../../shared/widgets/learner_shell.dart';
 
 String _date(DateTime d) {
   String d2(int n) => n.toString().padLeft(2, '0');
@@ -37,6 +38,7 @@ class NotificationsPage extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
+        leading: const MenuButton(),
         title: const Text('Notifications'),
         actions: [
           if (nonLues > 0)

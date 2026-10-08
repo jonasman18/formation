@@ -5,6 +5,9 @@ import 'package:go_router/go_router.dart';
 import '../../features/auth/presentation/auth_providers.dart';
 import '../../features/notifications/presentation/notifications_providers.dart';
 
+/// Clé du Scaffold du menu : permet de l'ouvrir depuis n'importe quelle page.
+final GlobalKey<ScaffoldState> shellScaffoldKey = GlobalKey<ScaffoldState>();
+
 class _Tab {
   const _Tab(this.path, this.icon, this.selectedIcon, this.label);
   final String path;
@@ -39,7 +42,7 @@ const _notifications = _Tab(
 );
 const _profil = _Tab('/profil', Icons.person_outline, Icons.person, 'Profil');
 
-/// Coque de l'application : barre de navigation du bas.
+/// Coque de l'application : menu latéral caché (ouvert par le bouton ☰).
 class LearnerShell extends ConsumerWidget {
   const LearnerShell({super.key, required this.location, required this.child});
 
@@ -69,19 +72,47 @@ class LearnerShell extends ConsumerWidget {
     }
 
     return Scaffold(
-      body: child,
-      bottomNavigationBar: NavigationBar(
+      key: shellScaffoldKey,
+      drawer: NavigationDrawer(
         selectedIndex: index < 0 ? 0 : index,
-        onDestinationSelected: (i) => context.go(tabs[i].path),
-        destinations: [
+        onDestinationSelected: (i) {
+          shellScaffoldKey.currentState?.closeDrawer();
+          context.go(tabs[i].path);
+        },
+        children: [
+          const Padding(
+            padding: EdgeInsets.fromLTRB(28, 24, 16, 12),
+            child: Text(
+              'Formation',
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
+            ),
+          ),
           for (final t in tabs)
-            NavigationDestination(
+            NavigationDrawerDestination(
               icon: icone(t, t.icon),
               selectedIcon: icone(t, t.selectedIcon),
-              label: t.label,
+              label: Text(t.label),
             ),
         ],
       ),
+      body: child,
+    );
+  }
+}
+
+/// Bouton ☰ à placer dans `leading:` de l'AppBar des pages principales.
+/// Affiche un badge s'il y a des notifications non lues.
+class MenuButton extends ConsumerWidget {
+  const MenuButton({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final nonLues = ref.watch(nonLuesProvider);
+    const menu = Icon(Icons.menu);
+    return IconButton(
+      tooltip: 'Menu',
+      icon: nonLues == 0 ? menu : Badge(label: Text('$nonLues'), child: menu),
+      onPressed: () => shellScaffoldKey.currentState?.openDrawer(),
     );
   }
 }

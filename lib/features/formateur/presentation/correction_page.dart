@@ -8,6 +8,8 @@ import '../../exercices/presentation/exercices_providers.dart';
 import '../domain/copie.dart';
 import 'copies_page.dart' show dateHeure;
 import 'formateur_providers.dart';
+import '../../../shared/widgets/fichier_tile.dart';
+import '../../exercices/data/exercice_fichiers.dart';
 
 class CorrectionPage extends ConsumerWidget {
   const CorrectionPage({super.key, required this.soumissionId});
@@ -108,6 +110,7 @@ class _CorrectionFormState extends ConsumerState<_CorrectionForm> {
   Widget build(BuildContext context) {
     final c = widget.copie;
     final theme = Theme.of(context);
+    final fichier = ref.watch(fichierSoumissionProvider(c.id)).asData?.value;
 
     return Form(
       key: _formKey,
@@ -139,17 +142,26 @@ class _CorrectionFormState extends ConsumerState<_CorrectionForm> {
           const SizedBox(height: 12),
           Text('Réponse de l\'apprenant', style: theme.textTheme.titleSmall),
           const SizedBox(height: 8),
-          Card(
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: SizedBox(
-                width: double.infinity,
-                child: SelectableText(
-                  (c.contenu ?? '').isEmpty ? '(réponse vide)' : c.contenu!,
+          if ((c.contenu ?? '').isNotEmpty || fichier == null)
+            Card(
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: SizedBox(
+                  width: double.infinity,
+                  child: SelectableText(
+                    (c.contenu ?? '').isEmpty ? '(réponse vide)' : c.contenu!,
+                  ),
                 ),
               ),
             ),
-          ),
+          if (fichier != null)
+            Card(
+              child: FichierTile(
+                bucket: ExerciceFichiersRepository.bucketRendus,
+                chemin: fichier,
+                nom: nomDepuisChemin(fichier),
+              ),
+            ),
           const SizedBox(height: 24),
           TextFormField(
             controller: _note,

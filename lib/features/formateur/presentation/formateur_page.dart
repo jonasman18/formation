@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../shared/widgets/async_body.dart';
 import '../domain/formation_geree.dart';
 import 'formateur_providers.dart';
+import '../../../shared/widgets/learner_shell.dart';
 
 class FormateurPage extends ConsumerWidget {
   const FormateurPage({super.key});
@@ -15,6 +16,7 @@ class FormateurPage extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
+        leading: const MenuButton(),
         title: const Text('Espace formateur'),
         actions: [
           IconButton(

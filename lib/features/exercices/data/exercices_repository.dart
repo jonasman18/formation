@@ -20,7 +20,7 @@ class ExercicesRepository {
     final uid = _client.auth.currentUser!.id;
     final row = await _client
         .from('soumissions')
-        .select('id, contenu, note, commentaire, corrige_at')
+        .select('id, contenu, fichier_path, note, commentaire, corrige_at')
         .eq('exercice_id', exerciceId)
         .eq('apprenant_id', uid)
         .maybeSingle();
@@ -28,12 +28,21 @@ class ExercicesRepository {
   }
 
   /// Dépose ou remplace ma copie (possible tant qu'elle n'est pas corrigée : RLS).
-  Future<void> soumettre(String exerciceId, String contenu) async {
+  /// [fichierPath] : nouveau fichier ; [retirerFichier] : supprime le fichier existant.
+  /// Sans l'un ni l'autre, le fichier déjà joint est conservé.
+  Future<void> soumettre(
+    String exerciceId,
+    String contenu, {
+    String? fichierPath,
+    bool retirerFichier = false,
+  }) async {
     await _client.from('soumissions').upsert({
       'exercice_id': exerciceId,
       'apprenant_id': _client.auth.currentUser!.id,
       'contenu': contenu,
       'soumis_at': DateTime.now().toUtc().toIso8601String(),
+      'fichier_path': ?fichierPath,
+      if (fichierPath == null && retirerFichier) 'fichier_path': null,
     }, onConflict: 'exercice_id,apprenant_id');
   }
 }

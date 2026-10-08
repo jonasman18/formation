@@ -5,6 +5,7 @@ import '../../../core/supabase/supabase_providers.dart';
 import '../../../shared/widgets/async_body.dart';
 import '../../auth/domain/profile.dart';
 import '../../auth/presentation/auth_providers.dart';
+import '../../../shared/widgets/learner_shell.dart';
 
 class ProfilPage extends ConsumerWidget {
   const ProfilPage({super.key});
@@ -15,7 +16,7 @@ class ProfilPage extends ConsumerWidget {
     final email = ref.watch(supabaseClientProvider).auth.currentUser?.email;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Profil')),
+      appBar: AppBar(leading: const MenuButton(), title: const Text('Profil')),
       body: AsyncBody<Profile?>(
         value: profile,
         onRetry: () => ref.invalidate(currentProfileProvider),

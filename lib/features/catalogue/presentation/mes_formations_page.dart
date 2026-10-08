@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../shared/widgets/async_body.dart';
 import '../domain/formation.dart';
 import 'catalogue_providers.dart';
+import '../../../shared/widgets/learner_shell.dart';
 
 class MesFormationsPage extends ConsumerWidget {
   const MesFormationsPage({super.key});
@@ -15,7 +16,10 @@ class MesFormationsPage extends ConsumerWidget {
     final theme = Theme.of(context);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Mes formations')),
+      appBar: AppBar(
+        leading: const MenuButton(),
+        title: const Text('Mes formations'),
+      ),
       body: AsyncBody<List<MaFormation>>(
         value: mes,
         onRetry: () => ref.invalidate(mesFormationsProvider),

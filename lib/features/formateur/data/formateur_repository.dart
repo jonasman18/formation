@@ -274,18 +274,23 @@ class FormateurRepository {
   }
 
   // ---------- Exercices ----------
-  Future<void> creerExercice({
+  Future<String> creerExercice({
     required String moduleId,
     required String titre,
     String? consigne,
     DateTime? dateLimite,
   }) async {
-    await _client.from('exercices').insert({
-      'module_id': moduleId,
-      'titre': titre,
-      'consigne': consigne,
-      'date_limite': dateLimite?.toUtc().toIso8601String(),
-    });
+    final row = await _client
+        .from('exercices')
+        .insert({
+          'module_id': moduleId,
+          'titre': titre,
+          'consigne': consigne,
+          'date_limite': dateLimite?.toUtc().toIso8601String(),
+        })
+        .select('id')
+        .single();
+    return row['id'] as String;
   }
 
   Future<void> modifierExercice(

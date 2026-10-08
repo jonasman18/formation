@@ -6,6 +6,7 @@ import '../../../shared/widgets/async_body.dart';
 
 import '../domain/formation.dart';
 import 'catalogue_providers.dart';
+import '../../../shared/widgets/learner_shell.dart';
 
 class CataloguePage extends ConsumerWidget {
   const CataloguePage({super.key});
@@ -16,7 +17,10 @@ class CataloguePage extends ConsumerWidget {
     final theme = Theme.of(context);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Catalogue')),
+      appBar: AppBar(
+        leading: const MenuButton(),
+        title: const Text('Catalogue'),
+      ),
       body: AsyncBody<List<Formation>>(
         value: formations,
         onRetry: () => ref.invalidate(formationsPublieesProvider),

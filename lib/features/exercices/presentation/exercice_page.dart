@@ -2,7 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../shared/utils/errors.dart';
+import '../../../shared/utils/pick_file.dart';
 import '../../../shared/widgets/async_body.dart';
+import '../../../shared/widgets/fichier_tile.dart';
+import '../data/exercice_fichiers.dart';
 import '../domain/exercice.dart';
 import 'exercices_providers.dart';
 
@@ -24,6 +27,8 @@ class _ExercicePageState extends ConsumerState<ExercicePage> {
   final _controller = TextEditingController();
   bool _edition = false;
   bool _busy = false;
+  FichierChoisi? _nouveau; // fichier choisi, pas encore envoyé
+  bool _retirer = false; // l'apprenant retire le fichier déjà envoyé
 
   @override
   void dispose() {
@@ -36,33 +41,88 @@ class _ExercicePageState extends ConsumerState<ExercicePage> {
 
   String _note(double n) => '${n.toStringAsFixed(n % 1 == 0 ? 0 : 2)} / 20';
 
-  Future<void> _envoyer() async {
-    final texte = _controller.text.trim();
-    if (texte.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Écrivez votre réponse avant d\'envoyer.'),
-        ),
-      );
+  void _msg(String texte) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(texte)));
+  }
+
+  void _reinitialiserFichier() {
+    _nouveau = null;
+    _retirer = false;
+  }
+
+  Future<void> _choisir() async {
+    final f = await choisirFichier(extensions: extensionsRendu);
+    if (f == null || !mounted) return;
+    if (f.octets.length > tailleMaxOctets) {
+      _msg('Fichier trop volumineux (20 Mo maximum).');
       return;
     }
+    setState(() {
+      _nouveau = f;
+      _retirer = false;
+    });
+  }
+
+  Future<void> _envoyer(Soumission? s) async {
+    final texte = _controller.text.trim();
+    final ancien = s?.fichierPath;
+    final garderAncien = ancien != null && !_retirer && _nouveau == null;
+
+    if (texte.isEmpty && _nouveau == null && !garderAncien) {
+      _msg('Écrivez une réponse ou joignez un fichier avant d\'envoyer.');
+      return;
+    }
+
+    final messenger = ScaffoldMessenger.of(context);
+    final fichiers = ref.read(exerciceFichiersRepositoryProvider);
+    final repo = ref.read(exercicesRepositoryProvider);
+
     setState(() => _busy = true);
+    String? nouveauChemin;
+    var soumis = false;
     try {
-      await ref
-          .read(exercicesRepositoryProvider)
-          .soumettre(widget.exerciceId, texte);
+      if (_nouveau != null) {
+        nouveauChemin = await fichiers.uploaderRendu(
+          exerciceId: widget.exerciceId,
+          nom: _nouveau!.nom,
+          octets: _nouveau!.octets,
+        );
+      }
+      await repo.soumettre(
+        widget.exerciceId,
+        texte,
+        fichierPath: nouveauChemin,
+        retirerFichier: _retirer && nouveauChemin == null,
+      );
+      soumis = true;
+
+      if (ancien != null && (nouveauChemin != null || _retirer)) {
+        await fichiers.supprimerFichierStockage(
+          ExerciceFichiersRepository.bucketRendus,
+          ancien,
+        );
+      }
+
       ref.invalidate(maSoumissionProvider(widget.exerciceId));
       await ref.read(maSoumissionProvider(widget.exerciceId).future);
       if (mounted) {
-        setState(() => _edition = false);
-        ScaffoldMessenger.of(context)
-            .showSnackBar(const SnackBar(content: Text('Réponse envoyée ✓')));
+        setState(() {
+          _edition = false;
+          _reinitialiserFichier();
+        });
+        messenger.showSnackBar(
+          const SnackBar(content: Text('Réponse envoyée ✓')),
+        );
       }
     } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text(humanError(e))));
+      if (!soumis && nouveauChemin != null) {
+        await fichiers.supprimerFichierStockage(
+          ExerciceFichiersRepository.bucketRendus,
+          nouveauChemin,
+        );
       }
+      messenger.showSnackBar(SnackBar(content: Text(humanError(e))));
     } finally {
       if (mounted) setState(() => _busy = false);
     }
@@ -92,6 +152,9 @@ class _ExercicePageState extends ConsumerState<ExercicePage> {
     final theme = Theme.of(context);
     final enRetard =
         e.dateLimite != null && DateTime.now().isAfter(e.dateLimite!);
+    final consignes =
+        ref.watch(consignesProvider(widget.exerciceId)).asData?.value ??
+        const <FichierJoint>[];
 
     return ListView(
       padding: const EdgeInsets.all(16),
@@ -110,6 +173,19 @@ class _ExercicePageState extends ConsumerState<ExercicePage> {
           e.consigne ?? 'Aucune consigne.',
           style: theme.textTheme.bodyLarge,
         ),
+        if (consignes.isNotEmpty) ...[
+          const SizedBox(height: 16),
+          Text('Documents', style: theme.textTheme.titleSmall),
+          const SizedBox(height: 4),
+          for (final f in consignes)
+            Card(
+              child: FichierTile(
+                bucket: ExerciceFichiersRepository.bucketConsignes,
+                chemin: f.chemin,
+                nom: f.titre,
+              ),
+            ),
+        ],
         const SizedBox(height: 24),
         const Divider(),
         const SizedBox(height: 16),
@@ -128,12 +204,47 @@ class _ExercicePageState extends ConsumerState<ExercicePage> {
       textCapitalization: TextCapitalization.sentences,
       decoration: const InputDecoration(
         border: OutlineInputBorder(),
-        hintText: 'Écrivez votre réponse ici…',
+        hintText: 'Écrivez votre réponse ici (facultatif si vous joignez un fichier)…',
       ),
+    ),
+    const SizedBox(height: 12),
+    if (_nouveau != null)
+      Card(
+        child: ListTile(
+          leading: const Icon(Icons.attach_file),
+          title: Text(
+            _nouveau!.nom,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+          ),
+          trailing: IconButton(
+            tooltip: 'Retirer',
+            icon: const Icon(Icons.close),
+            onPressed: _busy ? null : () => setState(() => _nouveau = null),
+          ),
+        ),
+      )
+    else if (s?.fichierPath != null && !_retirer)
+      Card(
+        child: FichierTile(
+          bucket: ExerciceFichiersRepository.bucketRendus,
+          chemin: s!.fichierPath!,
+          nom: nomDepuisChemin(s.fichierPath!),
+          trailing: IconButton(
+            tooltip: 'Retirer',
+            icon: const Icon(Icons.close),
+            onPressed: _busy ? null : () => setState(() => _retirer = true),
+          ),
+        ),
+      ),
+    OutlinedButton.icon(
+      onPressed: _busy ? null : _choisir,
+      icon: const Icon(Icons.attach_file),
+      label: const Text('Joindre un fichier (PDF, image, Word)'),
     ),
     const SizedBox(height: 16),
     FilledButton.icon(
-      onPressed: _busy ? null : _envoyer,
+      onPressed: _busy ? null : () => _envoyer(s),
       icon: _busy
           ? const SizedBox(
               height: 18,
@@ -145,7 +256,12 @@ class _ExercicePageState extends ConsumerState<ExercicePage> {
     ),
     if (s != null)
       TextButton(
-        onPressed: _busy ? null : () => setState(() => _edition = false),
+        onPressed: _busy
+            ? null
+            : () => setState(() {
+                _edition = false;
+                _reinitialiserFichier();
+              }),
         child: const Text('Annuler'),
       ),
   ];
@@ -167,12 +283,21 @@ class _ExercicePageState extends ConsumerState<ExercicePage> {
         ],
       ),
       const SizedBox(height: 12),
-      Card(
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: SizedBox(width: double.infinity, child: Text(s.contenu ?? '')),
+      if ((s.contenu ?? '').isNotEmpty)
+        Card(
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: SizedBox(width: double.infinity, child: Text(s.contenu!)),
+          ),
         ),
-      ),
+      if (s.fichierPath != null)
+        Card(
+          child: FichierTile(
+            bucket: ExerciceFichiersRepository.bucketRendus,
+            chemin: s.fichierPath!,
+            nom: nomDepuisChemin(s.fichierPath!),
+          ),
+        ),
       if (s.corrigee) ...[
         const SizedBox(height: 16),
         if (s.note != null)
@@ -191,6 +316,7 @@ class _ExercicePageState extends ConsumerState<ExercicePage> {
         OutlinedButton.icon(
           onPressed: () => setState(() {
             _controller.text = s.contenu ?? '';
+            _reinitialiserFichier();
             _edition = true;
           }),
           icon: const Icon(Icons.edit),
