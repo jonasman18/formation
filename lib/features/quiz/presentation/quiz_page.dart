@@ -23,10 +23,38 @@ class _QuizPageState extends ConsumerState<QuizPage> {
   bool _busy = false;
   QuizResultat? _resultat;
 
-  bool _complet(Quiz quiz) =>
-      quiz.questions.every((q) => (_reponses[q.id] ?? {}).isNotEmpty);
+  int _sansReponse(Quiz quiz) =>
+      quiz.questions.where((q) => (_reponses[q.id] ?? {}).isEmpty).length;
 
-  Future<void> _envoyer() async {
+  Future<void> _envoyer(Quiz quiz) async {
+    final vides = _sansReponse(quiz);
+    if (vides > 0) {
+      final ok = await showDialog<bool>(
+        context: context,
+        builder: (ctx) => AlertDialog(
+          title: const Text('Questions sans réponse'),
+          content: Text(
+            vides == 1
+                ? 'Vous n\'avez pas répondu à 1 question. '
+                      'Elle comptera comme fausse. Envoyer quand même ?'
+                : 'Vous n\'avez pas répondu à $vides questions. '
+                      'Elles compteront comme fausses. Envoyer quand même ?',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx, false),
+              child: const Text('Revenir au quiz'),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.pop(ctx, true),
+              child: const Text('Envoyer'),
+            ),
+          ],
+        ),
+      );
+      if (ok != true || !mounted) return;
+    }
+
     setState(() => _busy = true);
     try {
       final payload = {
@@ -120,7 +148,7 @@ class _QuizPageState extends ConsumerState<QuizPage> {
           ),
         const SizedBox(height: 8),
         FilledButton(
-          onPressed: (_busy || !_complet(quiz)) ? null : _envoyer,
+          onPressed: _busy ? null : () => _envoyer(quiz),
           child: _busy
               ? const SizedBox(
                   height: 20,

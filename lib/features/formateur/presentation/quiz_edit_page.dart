@@ -8,6 +8,8 @@ import '../../cours/presentation/cours_providers.dart';
 import '../../quiz/presentation/quiz_providers.dart';
 import '../domain/quiz_edition.dart';
 import 'formateur_providers.dart';
+import '../../../shared/utils/pick_file.dart';
+import '../data/quiz_ia_service.dart';
 
 /// Création (quizId == null) ou modification d'un quiz.
 class QuizEditPage extends ConsumerWidget {
@@ -89,6 +91,7 @@ class _QuizFormState extends ConsumerState<_QuizForm> {
   late final List<_QuestionCtl> _questions;
   late double _noteMin;
   bool _busy = false;
+  bool _generation = false;
 
   @override
   void initState() {
@@ -252,6 +255,28 @@ class _QuizFormState extends ConsumerState<_QuizForm> {
             onChanged: _busy ? null : (v) => setState(() => _noteMin = v),
           ),
           const SizedBox(height: 8),
+          OutlinedButton.icon(
+            onPressed: (_busy || _generation) ? null : _genererDepuisPdf,
+            icon: _generation
+                ? const SizedBox(
+                    height: 18,
+                    width: 18,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
+                : const Icon(Icons.auto_awesome),
+            label: Text(
+              _generation
+                  ? 'Génération en cours…'
+                  : 'Générer des questions depuis un PDF',
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            'Le PDF est envoyé à Google Gemini. Les questions générées sont '
+            'des suggestions : relisez-les avant d\'enregistrer.',
+            style: theme.textTheme.bodySmall,
+          ),
+          const SizedBox(height: 16),
           Text('Questions', style: theme.textTheme.titleMedium),
           const SizedBox(height: 4),
           Text(
@@ -292,6 +317,92 @@ class _QuizFormState extends ConsumerState<_QuizForm> {
         ],
       ),
     );
+  }
+
+  Future<int?> _demanderNombre() {
+    var n = 10.0;
+    return showDialog<int>(
+      context: context,
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setLocal) => AlertDialog(
+          title: const Text('Nombre de questions'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                '${n.round()} questions',
+                style: Theme.of(ctx).textTheme.titleMedium,
+              ),
+              Slider(
+                value: n,
+                min: 1,
+                max: 30,
+                divisions: 29,
+                label: '${n.round()}',
+                onChanged: (v) => setLocal(() => n = v),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx),
+              child: const Text('Annuler'),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.pop(ctx, n.round()),
+              child: const Text('Générer'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _genererDepuisPdf() async {
+    final f = await choisirFichier(extensions: ['pdf']);
+    if (f == null || !mounted) return;
+    if (f.octets.length > 8 * 1024 * 1024) {
+      _msg('PDF trop volumineux pour la génération (8 Mo maximum).');
+      return;
+    }
+    final nb = await _demanderNombre();
+    if (nb == null || !mounted) return;
+
+    final service = ref.read(quizIaServiceProvider);
+    setState(() => _generation = true);
+    try {
+      final r = await service.generer(f.octets, nbQuestions: nb);
+      if (!mounted) return;
+      setState(() {
+        // on remplace la question vide du départ
+        if (_questions.length == 1 &&
+            _questions.first.enonce.text.trim().isEmpty) {
+          _questions.removeAt(0).dispose();
+        }
+        if (_titre.text.trim().isEmpty && r.titre.isNotEmpty) {
+          _titre.text = r.titre;
+        }
+        for (final q in r.questions) {
+          _questions.add(
+            _QuestionCtl(
+              enonce: q.enonce,
+              choix: [
+                for (final c in q.choix)
+                  _ChoixCtl(texte: c.texte, correct: c.correct),
+              ],
+            ),
+          );
+        }
+      });
+      _msg(
+        '${r.questions.length} questions générées. '
+        'Relisez-les avant d\'enregistrer.',
+      );
+    } catch (e) {
+      _msg(e is QuizIaException ? e.message : humanError(e));
+    } finally {
+      if (mounted) setState(() => _generation = false);
+    }
   }
 
   Widget _carteQuestion(int i) {

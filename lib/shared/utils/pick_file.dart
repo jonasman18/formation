@@ -12,7 +12,9 @@ class FichierChoisi {
 }
 
 /// Ouvre le sélecteur de fichiers. Renvoie null si l'utilisateur annule.
-Future<FichierChoisi?> choisirFichier({required List<String> extensions}) async {
+Future<FichierChoisi?> choisirFichier({
+  required List<String> extensions,
+}) async {
   final fichiers = await FilePicker.pickFiles(
     type: FileType.custom,
     allowedExtensions: extensions,
