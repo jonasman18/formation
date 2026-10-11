@@ -34,6 +34,12 @@ const _formateur = _Tab(
   Icons.cast_for_education,
   'Formateur',
 );
+const _admin = _Tab(
+  '/admin',
+  Icons.admin_panel_settings_outlined,
+  Icons.admin_panel_settings,
+  'Administration',
+);
 const _notifications = _Tab(
   '/notifications',
   Icons.notifications_outlined,
@@ -60,6 +66,7 @@ class LearnerShell extends ConsumerWidget {
       _catalogue,
       _mesFormations,
       if (estStaff) _formateur,
+      if (role == 'admin') _admin,
       _notifications,
       _profil,
     ];

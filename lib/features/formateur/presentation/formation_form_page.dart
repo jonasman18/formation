@@ -7,6 +7,7 @@ import '../../../shared/widgets/async_body.dart';
 import '../../catalogue/presentation/catalogue_providers.dart';
 import '../domain/formation_geree.dart';
 import 'formateur_providers.dart';
+import '../../inscriptions/presentation/acces_formation_switch.dart';
 
 /// Création (formationId == null) ou modification d'une formation.
 class FormationFormPage extends ConsumerWidget {
@@ -226,6 +227,10 @@ class _FormationFormState extends ConsumerState<_FormationForm> {
             'Seules les formations « Publiée » apparaissent dans le catalogue.',
             style: theme.textTheme.bodySmall,
           ),
+          if (widget.initial != null) ...[
+            const SizedBox(height: 16),
+            AccesFormationSwitch(formationId: widget.initial!.id),
+          ],
           const SizedBox(height: 24),
           if (widget.initial == null)
             Padding(

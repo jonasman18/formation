@@ -48,4 +48,5 @@ app.*.map.json
 .widget_preview/
 
 env.json
+env.local.json
 android/app/google-services.json

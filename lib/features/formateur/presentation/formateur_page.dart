@@ -6,6 +6,7 @@ import '../../../shared/widgets/async_body.dart';
 import '../domain/formation_geree.dart';
 import 'formateur_providers.dart';
 import '../../../shared/widgets/learner_shell.dart';
+import '../../inscriptions/presentation/inscriptions_providers.dart';
 
 class FormateurPage extends ConsumerWidget {
   const FormateurPage({super.key});
@@ -13,12 +14,23 @@ class FormateurPage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final formations = ref.watch(formationsGereesProvider);
+    final nbDemandes = ref.watch(demandesProvider).asData?.value.length ?? 0;
 
     return Scaffold(
       appBar: AppBar(
         leading: const MenuButton(),
         title: const Text('Espace formateur'),
         actions: [
+          IconButton(
+            tooltip: 'Demandes d\'inscription',
+            icon: nbDemandes == 0
+                ? const Icon(Icons.how_to_reg_outlined)
+                : Badge(
+                    label: Text('$nbDemandes'),
+                    child: const Icon(Icons.how_to_reg_outlined),
+                  ),
+            onPressed: () => context.go('/formateur/demandes'),
+          ),
           IconButton(
             tooltip: 'Copies à corriger',
             icon: const Icon(Icons.rate_review_outlined),

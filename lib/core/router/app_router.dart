@@ -23,6 +23,8 @@ import '../../features/formateur/presentation/correction_page.dart';
 import '../../features/notifications/presentation/notifications_page.dart';
 import '../../features/formateur/presentation/exercice_edit_page.dart';
 import '../../features/formateur/presentation/quiz_edit_page.dart';
+import '../../features/admin/presentation/admin_page.dart';
+import '../../features/inscriptions/presentation/demandes_page.dart';
 
 /// Relance les redirections quand l'utilisateur se connecte ou se déconnecte.
 class _RouterRefresh extends ChangeNotifier {
@@ -123,6 +125,11 @@ final routerProvider = Provider<GoRouter>((ref) {
                   ),
                 ],
               ),
+              // Demandes d'inscription : /formateur/demandes
+              GoRoute(
+                path: 'demandes',
+                builder: (_, _) => const DemandesPage(),
+              ),
               GoRoute(
                 path: 'formation/:id',
                 builder: (_, state) =>
@@ -185,6 +192,7 @@ final routerProvider = Provider<GoRouter>((ref) {
               ),
             ],
           ),
+          GoRoute(path: '/admin', builder: (_, _) => const AdminPage()),
           GoRoute(
             path: '/notifications',
             builder: (_, _) => const NotificationsPage(),
