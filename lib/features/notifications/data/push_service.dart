@@ -5,6 +5,8 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import 'notifications_locales.dart';
+
 /// Enregistre le jeton FCM de cet appareil et écoute les notifications push.
 class PushService {
   PushService(this._client);
@@ -33,8 +35,16 @@ class PushService {
         return;
       }
 
-      // App ouverte : message reçu / appui sur une notification
-      _subs.add(FirebaseMessaging.onMessage.listen(onMessage));
+      // Crée le canal « haute importance » et prépare les bannières
+      await NotificationsLocales.init();
+
+      // App ouverte : bannière système + traitement habituel
+      _subs.add(
+        FirebaseMessaging.onMessage.listen((m) {
+          NotificationsLocales.afficher(m);
+          onMessage(m);
+        }),
+      );
       _subs.add(
         FirebaseMessaging.onMessageOpenedApp.listen((_) => onOuverture()),
       );
