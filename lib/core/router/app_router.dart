@@ -25,11 +25,13 @@ import '../../features/formateur/presentation/exercice_edit_page.dart';
 import '../../features/formateur/presentation/quiz_edit_page.dart';
 import '../../features/admin/presentation/admin_page.dart';
 import '../../features/inscriptions/presentation/demandes_page.dart';
+import '../../features/annonces/presentation/annonces_page.dart';
 
 /// Relance les redirections quand l'utilisateur se connecte ou se déconnecte.
 class _RouterRefresh extends ChangeNotifier {
   _RouterRefresh(Ref ref) {
     ref.listen(currentUserIdProvider, (_, _) => notifyListeners());
+    ref.listen(currentProfileProvider, (_, _) => notifyListeners());
   }
 }
 
@@ -46,7 +48,40 @@ final routerProvider = Provider<GoRouter>((ref) {
       final isAuthRoute = loc == '/login' || loc == '/register';
 
       if (!loggedIn) return isAuthRoute ? null : '/login';
-      if (isAuthRoute) return '/catalogue';
+
+      // Rôle : tant que le profil n'est pas chargé, on ne décide rien.
+      final role = ref.read(currentProfileProvider).asData?.value?.role.name;
+      if (role == null) return null;
+
+      final accueil = switch (role) {
+        'admin' => '/admin',
+        'formateur' => '/formateur',
+        _ => '/catalogue',
+      };
+      if (isAuthRoute) return accueil;
+
+      bool sous(String p) => loc == p || loc.startsWith('$p/');
+
+      switch (role) {
+        case 'apprenant':
+          // Espaces réservés au personnel
+          if (sous('/formateur') || sous('/admin')) return '/catalogue';
+        case 'formateur':
+          // Pas d'espace admin, pas de catalogue ni de « Mes formations »
+          if (sous('/admin') || sous('/catalogue') || sous('/mes-formations')) {
+            return '/formateur';
+          }
+        case 'admin':
+          // Superviseur : il édite les formations existantes, il n'en crée pas
+          if (sous('/catalogue') ||
+              sous('/mes-formations') ||
+              loc == '/formateur' ||
+              sous('/formateur/copies') ||
+              sous('/formateur/demandes') ||
+              loc == '/formateur/formation/nouvelle') {
+            return '/admin';
+          }
+      }
       return null;
     },
     routes: [
@@ -94,6 +129,14 @@ final routerProvider = Provider<GoRouter>((ref) {
                           exerciceId: state.pathParameters['exerciceId']!,
                         ),
                       ),
+                      // Annonces du formateur (lecture seule pour l'apprenant)
+                      GoRoute(
+                        path: 'annonces',
+                        builder: (_, state) => AnnoncesPage(
+                          formationId: state.pathParameters['id']!,
+                          peutPublier: false,
+                        ),
+                      ),
                     ],
                   ),
                 ],
@@ -135,6 +178,13 @@ final routerProvider = Provider<GoRouter>((ref) {
                 builder: (_, state) =>
                     FormationFormPage(formationId: state.pathParameters['id']!),
                 routes: [
+                  GoRoute(
+                    path: 'annonces',
+                    builder: (_, state) => AnnoncesPage(
+                      formationId: state.pathParameters['id']!,
+                      peutPublier: true,
+                    ),
+                  ),
                   GoRoute(
                     path: 'contenu',
                     builder: (_, state) =>

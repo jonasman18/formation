@@ -72,7 +72,19 @@ class FormateurPage extends ConsumerWidget {
                         leading: Icon(
                           f.statut == 'publie' ? Icons.public : Icons.edit_note,
                         ),
-                        trailing: const Icon(Icons.chevron_right),
+                        trailing: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            IconButton(
+                              tooltip: 'Annonces',
+                              icon: const Icon(Icons.campaign_outlined),
+                              onPressed: () => context.go(
+                                '/formateur/formation/${f.id}/annonces',
+                              ),
+                            ),
+                            const Icon(Icons.chevron_right),
+                          ],
+                        ),
                         onTap: () => context.go('/formateur/formation/${f.id}'),
                       ),
                     );

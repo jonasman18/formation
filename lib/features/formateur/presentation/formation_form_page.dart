@@ -262,6 +262,14 @@ class _FormationFormState extends ConsumerState<_FormationForm> {
               label: const Text('Gérer les modules et leçons'),
             ),
             const SizedBox(height: 8),
+            OutlinedButton.icon(
+              onPressed: () => context.go(
+                '/formateur/formation/${widget.initial!.id}/annonces',
+              ),
+              icon: const Icon(Icons.campaign_outlined),
+              label: const Text('Annonces aux inscrits'),
+            ),
+            const SizedBox(height: 8),
             TextButton.icon(
               onPressed: _busy ? null : _supprimer,
               icon: Icon(Icons.delete_outline, color: theme.colorScheme.error),

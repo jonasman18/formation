@@ -17,7 +17,17 @@ class CoursPage extends ConsumerWidget {
     final theme = Theme.of(context);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Cours')),
+      appBar: AppBar(
+        title: const Text('Cours'),
+        actions: [
+          IconButton(
+            tooltip: 'Annonces du formateur',
+            icon: const Icon(Icons.campaign_outlined),
+            onPressed: () =>
+                context.go('/catalogue/formation/$formationId/cours/annonces'),
+          ),
+        ],
+      ),
       body: AsyncBody<List<Module>>(
         value: modules,
         onRetry: () => ref.invalidate(modulesProvider(formationId)),

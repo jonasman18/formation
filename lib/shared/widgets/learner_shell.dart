@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../features/auth/presentation/auth_providers.dart';
 import '../../features/notifications/presentation/notifications_providers.dart';
+import 'avatar_utilisateur.dart';
 
 /// Clé du Scaffold du menu : permet de l'ouvrir depuis n'importe quelle page.
 final GlobalKey<ScaffoldState> shellScaffoldKey = GlobalKey<ScaffoldState>();
@@ -28,11 +29,23 @@ const _mesFormations = _Tab(
   Icons.school,
   'Mes formations',
 );
-const _formateur = _Tab(
+const _espaceFormateur = _Tab(
   '/formateur',
   Icons.cast_for_education_outlined,
   Icons.cast_for_education,
-  'Formateur',
+  'Espace formateur',
+);
+const _copies = _Tab(
+  '/formateur/copies',
+  Icons.rate_review_outlined,
+  Icons.rate_review,
+  'Copies à corriger',
+);
+const _demandes = _Tab(
+  '/formateur/demandes',
+  Icons.how_to_reg_outlined,
+  Icons.how_to_reg,
+  'Demandes d’inscription',
 );
 const _admin = _Tab(
   '/admin',
@@ -48,6 +61,19 @@ const _notifications = _Tab(
 );
 const _profil = _Tab('/profil', Icons.person_outline, Icons.person, 'Profil');
 
+/// Menus par rôle.
+List<_Tab> _onglets(String? role) => switch (role) {
+  'admin' => const [_admin, _notifications, _profil],
+  'formateur' => const [
+    _espaceFormateur,
+    _copies,
+    _demandes,
+    _notifications,
+    _profil,
+  ],
+  _ => const [_catalogue, _mesFormations, _notifications, _profil],
+};
+
 /// Coque de l'application : menu latéral caché (ouvert par le bouton ☰).
 class LearnerShell extends ConsumerWidget {
   const LearnerShell({super.key, required this.location, required this.child});
@@ -59,18 +85,21 @@ class LearnerShell extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final profil = ref.watch(currentProfileProvider).asData?.value;
     final role = profil?.role.name;
-    final estStaff = role == 'formateur' || role == 'admin';
     final nonLues = ref.watch(nonLuesProvider);
 
-    final tabs = [
-      _catalogue,
-      _mesFormations,
-      if (estStaff) _formateur,
-      if (role == 'admin') _admin,
-      _notifications,
-      _profil,
-    ];
-    final index = tabs.indexWhere((t) => location.startsWith(t.path));
+    final tabs = _onglets(role);
+
+    // Onglet dont le chemin correspond le mieux (le plus long) à la page.
+    var index = -1;
+    var meilleur = -1;
+    for (var i = 0; i < tabs.length; i++) {
+      final p = tabs[i].path;
+      final correspond = location == p || location.startsWith('$p/');
+      if (correspond && p.length > meilleur) {
+        meilleur = p.length;
+        index = i;
+      }
+    }
 
     Widget icone(_Tab t, IconData data) {
       final icon = Icon(data);
@@ -87,11 +116,42 @@ class LearnerShell extends ConsumerWidget {
           context.go(tabs[i].path);
         },
         children: [
-          const Padding(
-            padding: EdgeInsets.fromLTRB(28, 24, 16, 12),
-            child: Text(
-              'Formation',
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(28, 24, 16, 12),
+            child: Row(
+              children: [
+                if (profil != null) ...[
+                  AvatarUtilisateur(
+                    nomComplet: profil.fullName,
+                    url: profil.avatarUrl,
+                    rayon: 26,
+                  ),
+                  const SizedBox(width: 14),
+                ],
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'Formation',
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      if (profil != null) ...[
+                        const SizedBox(height: 4),
+                        Text(
+                          '${profil.fullName} · ${profil.role.label}',
+                          style: Theme.of(context).textTheme.bodySmall,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+              ],
             ),
           ),
           for (final t in tabs)
