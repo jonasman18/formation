@@ -118,39 +118,50 @@ class LearnerShell extends ConsumerWidget {
         children: [
           Padding(
             padding: const EdgeInsets.fromLTRB(28, 24, 16, 12),
-            child: Row(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                const Text(
+                  'Formation',
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
+                ),
                 if (profil != null) ...[
-                  AvatarUtilisateur(
-                    nomComplet: profil.fullName,
-                    url: profil.avatarUrl,
-                    rayon: 26,
-                  ),
-                  const SizedBox(width: 14),
-                ],
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        'Formation',
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.w600,
+                  const SizedBox(height: 12),
+                  InkWell(
+                    borderRadius: BorderRadius.circular(8),
+                    onTap: () {
+                      shellScaffoldKey.currentState?.closeDrawer();
+                      context.go('/profil');
+                    },
+                    child: Row(
+                      children: [
+                        AvatarUtilisateur(
+                          nomComplet: profil.fullName,
+                          url: profil.avatarUrl,
+                          rayon: 22,
                         ),
-                      ),
-                      if (profil != null) ...[
-                        const SizedBox(height: 4),
-                        Text(
-                          '${profil.fullName} · ${profil.role.label}',
-                          style: Theme.of(context).textTheme.bodySmall,
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                profil.fullName,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: Theme.of(context).textTheme.titleSmall,
+                              ),
+                              Text(
+                                profil.role.label,
+                                style: Theme.of(context).textTheme.bodySmall,
+                              ),
+                            ],
+                          ),
                         ),
                       ],
-                    ],
+                    ),
                   ),
-                ),
+                ],
               ],
             ),
           ),
