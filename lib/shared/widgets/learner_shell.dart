@@ -178,7 +178,7 @@ class LearnerShell extends ConsumerWidget {
   }
 }
 
-/// Bouton ☰ à placer dans `leading:` de l'AppBar des pages principales.
+/// Bouton ☰  dans `leading:` de l'AppBar des pages principales.
 /// Affiche un badge s'il y a des notifications non lues.
 class MenuButton extends ConsumerWidget {
   const MenuButton({super.key});

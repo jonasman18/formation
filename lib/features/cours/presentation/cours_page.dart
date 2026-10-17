@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../shared/widgets/async_body.dart';
 import '../domain/cours.dart';
 import 'cours_providers.dart';
+import '../../examen/presentation/examen_card.dart';
 
 class CoursPage extends ConsumerWidget {
   const CoursPage({super.key, required this.formationId});
@@ -48,6 +49,8 @@ class CoursPage extends ConsumerWidget {
           return ListView(
             padding: const EdgeInsets.all(16),
             children: [
+              ExamenCard(formationId: formationId),
+              const SizedBox(height: 16),
               Text('Progression : $pct %', style: theme.textTheme.titleMedium),
               const SizedBox(height: 8),
               LinearProgressIndicator(value: pct / 100),

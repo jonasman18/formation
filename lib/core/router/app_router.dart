@@ -26,6 +26,9 @@ import '../../features/formateur/presentation/quiz_edit_page.dart';
 import '../../features/admin/presentation/admin_page.dart';
 import '../../features/inscriptions/presentation/demandes_page.dart';
 import '../../features/annonces/presentation/annonces_page.dart';
+import '../../features/certificats/presentation/mes_certificats_page.dart';
+import '../../features/formateur/presentation/examen_edit_page.dart';
+import '../../features/examen/presentation/examen_page.dart';
 
 /// Relance les redirections quand l'utilisateur se connecte ou se déconnecte.
 class _RouterRefresh extends ChangeNotifier {
@@ -123,6 +126,11 @@ final routerProvider = Provider<GoRouter>((ref) {
                         ),
                       ),
                       GoRoute(
+                      path: 'examen',
+                      builder: (context, state) =>
+                      ExamenPage(formationId: state.pathParameters['id']!),
+                      ),
+                      GoRoute(
                         path: 'exercice/:exerciceId',
                         builder: (_, state) => ExercicePage(
                           formationId: state.pathParameters['id']!,
@@ -186,6 +194,11 @@ final routerProvider = Provider<GoRouter>((ref) {
                     ),
                   ),
                   GoRoute(
+                    path: 'examen',
+                    builder: (context, state) =>
+                        ExamenEditPage(formationId: state.pathParameters['id']!),
+                  ),
+                  GoRoute(
                     path: 'contenu',
                     builder: (_, state) =>
                         ContenuPage(formationId: state.pathParameters['id']!),
@@ -247,7 +260,16 @@ final routerProvider = Provider<GoRouter>((ref) {
             path: '/notifications',
             builder: (_, _) => const NotificationsPage(),
           ),
-          GoRoute(path: '/profil', builder: (_, _) => const ProfilPage()),
+          GoRoute(
+            path: '/profil',
+            builder: (context, state) => const ProfilPage(),
+            routes: [
+          GoRoute(
+            path: 'certificats',
+            builder: (context, state) => const MesCertificatsPage(),
+              ),
+            ],
+          ),
         ],
       ),
     ],

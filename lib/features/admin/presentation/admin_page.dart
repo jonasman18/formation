@@ -8,6 +8,7 @@ import '../domain/admin_models.dart';
 import 'admin_providers.dart';
 import '../../../shared/widgets/learner_shell.dart';
 import 'admin_formations_tab.dart';
+import 'admin_stats_tab.dart';
 
 class AdminPage extends StatelessWidget {
   const AdminPage({super.key});
@@ -15,12 +16,13 @@ class AdminPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
-      length: 3,
+      length: 4,
       child: Scaffold(
         appBar: AppBar(
           leading: const MenuButton(),
           bottom: const TabBar(
             tabs: [
+              Tab(text: 'Statistiques'),
               Tab(text: 'Utilisateurs'),
               Tab(text: 'Formations'),
               Tab(text: 'Catégories'),
@@ -29,6 +31,7 @@ class AdminPage extends StatelessWidget {
         ),
         body: const TabBarView(
           children: [
+            StatistiquesAdminTab(),
             _UtilisateursTab(),
             FormationsAdminTab(),
             _CategoriesTab(),

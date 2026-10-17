@@ -269,6 +269,13 @@ class _FormationFormState extends ConsumerState<_FormationForm> {
               icon: const Icon(Icons.campaign_outlined),
               label: const Text('Annonces aux inscrits'),
             ),
+            const SizedBox(height: 8,),
+            OutlinedButton.icon(
+            onPressed: () =>
+            context.push('/formateur/formation/${widget.initial!.id}/examen'),
+            icon: const Icon(Icons.assignment_outlined),
+            label: const Text('Examen final'),
+            ),
             const SizedBox(height: 8),
             TextButton.icon(
               onPressed: _busy ? null : _supprimer,

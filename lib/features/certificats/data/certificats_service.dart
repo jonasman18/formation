@@ -1,4 +1,7 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import '../../../core/supabase/supabase_providers.dart';
 
 class CertificatException implements Exception {
   CertificatException(this.message);
@@ -7,6 +10,9 @@ class CertificatException implements Exception {
   String toString() => message;
 }
 
+final certificatsServiceProvider = Provider<CertificatsService>(
+  (ref) => CertificatsService(ref.watch(supabaseClientProvider)),
+);
 class CertificatsService {
   CertificatsService(this._client);
   final SupabaseClient _client;

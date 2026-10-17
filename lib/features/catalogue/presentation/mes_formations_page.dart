@@ -3,16 +3,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-import '../../../core/supabase/supabase_providers.dart';
 import '../../../shared/widgets/async_body.dart';
 import '../../../shared/widgets/learner_shell.dart';
 import '../../certificats/data/certificats_service.dart';
 import '../domain/formation.dart';
 import 'catalogue_providers.dart';
 
-final certificatsServiceProvider = Provider(
-  (ref) => CertificatsService(ref.watch(supabaseClientProvider)),
-);
 
 class MesFormationsPage extends ConsumerStatefulWidget {
   const MesFormationsPage({super.key});
