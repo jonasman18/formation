@@ -89,6 +89,15 @@ class _ExerciceFormState extends ConsumerState<_ExerciceForm> {
   }
 
   String get _retour => '/formateur/formation/${widget.formationId}/contenu';
+  
+  /// Revient à la page précédente ; repli sur la liste du contenu si la pile est vide.
+  void _revenir(GoRouter router) {
+    if (router.canPop()) {
+      router.pop();
+    } else {
+      router.go(_retour);
+    }
+  }
 
   String _date(DateTime d) =>
       '${d.day.toString().padLeft(2, '0')}/${d.month.toString().padLeft(2, '0')}/${d.year}';
@@ -129,7 +138,9 @@ class _ExerciceFormState extends ConsumerState<_ExerciceForm> {
         ref.invalidate(exerciceProvider);
         _msg('Exercice créé. Vous pouvez maintenant joindre des PDF.');
         // on reste sur l'exercice pour pouvoir y ajouter des documents
-        router.go('$_retour/module/${widget.moduleId}/exercice/$id');
+        router.pushReplacement(
+          '$_retour/module/${widget.moduleId}/exercice/$id',
+        );
         return;
       }
       await repo.modifierExercice(
@@ -140,7 +151,7 @@ class _ExerciceFormState extends ConsumerState<_ExerciceForm> {
       );
       ref.invalidate(modulesProvider(widget.formationId));
       ref.invalidate(exerciceProvider);
-      router.go(_retour);
+      _revenir(router);
     } catch (e) {
       _msg(humanError(e));
     } finally {
@@ -227,7 +238,7 @@ class _ExerciceFormState extends ConsumerState<_ExerciceForm> {
       }
       ref.invalidate(modulesProvider(widget.formationId));
       ref.invalidate(exerciceProvider);
-      router.go(_retour);
+      _revenir(router);
     } catch (e) {
       _msg(humanError(e));
     } finally {

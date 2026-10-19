@@ -31,7 +31,7 @@ class FormationsAdminTab extends ConsumerWidget {
       messenger.showSnackBar(
         const SnackBar(
           content: Text(
-            'Aucun formateur : passez d’abord un utilisateur au rôle Formateur.',
+            'Aucun formateur.',
           ),
         ),
       );
@@ -112,17 +112,28 @@ class FormationsAdminTab extends ConsumerWidget {
                 ),
                 isThreeLine: true,
                 onTap: () => context.push('/formateur/formation/${f.id}'),
-                trailing: PopupMenuButton<String>(
-                  tooltip: 'Actions',
-                  onSelected: (v) {
-                    if (v == 'responsable') {
-                      _changerResponsable(context, ref, f);
-                    }
-                  },
-                  itemBuilder: (_) => const [
-                    PopupMenuItem(
-                      value: 'responsable',
-                      child: Text('Changer le responsable'),
+                trailing: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    IconButton(
+                      tooltip: 'Voir le contenu',
+                      icon: const Icon(Icons.visibility_outlined),
+                      onPressed: () =>
+                          context.push('/admin/formation/${f.id}/contenu'),
+                    ),
+                    PopupMenuButton<String>(
+                      tooltip: 'Actions',
+                      onSelected: (v) {
+                        if (v == 'responsable') {
+                          _changerResponsable(context, ref, f);
+                        }
+                      },
+                      itemBuilder: (_) => const [
+                        PopupMenuItem(
+                          value: 'responsable',
+                          child: Text('Changer le responsable'),
+                        ),
+                      ],
                     ),
                   ],
                 ),

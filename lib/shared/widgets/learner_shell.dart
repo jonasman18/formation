@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../features/auth/presentation/auth_providers.dart';
 import '../../features/notifications/presentation/notifications_providers.dart';
 import 'avatar_utilisateur.dart';
+import '../../features/gamification/presentation/ligne_points.dart';
 
 /// Clé du Scaffold du menu : permet de l'ouvrir depuis n'importe quelle page.
 final GlobalKey<ScaffoldState> shellScaffoldKey = GlobalKey<ScaffoldState>();
@@ -100,6 +101,9 @@ class LearnerShell extends ConsumerWidget {
         index = i;
       }
     }
+    if (role == 'admin' && index < 0 && location.startsWith('/formateur')) {
+      index = 0;
+    }
 
     Widget icone(_Tab t, IconData data) {
       final icon = Icon(data);
@@ -155,6 +159,7 @@ class LearnerShell extends ConsumerWidget {
                                 profil.role.label,
                                 style: Theme.of(context).textTheme.bodySmall,
                               ),
+                              const LignePoints(),
                             ],
                           ),
                         ),

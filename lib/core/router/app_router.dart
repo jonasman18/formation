@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -29,6 +28,9 @@ import '../../features/annonces/presentation/annonces_page.dart';
 import '../../features/certificats/presentation/mes_certificats_page.dart';
 import '../../features/formateur/presentation/examen_edit_page.dart';
 import '../../features/examen/presentation/examen_page.dart';
+import '../../features/admin/presentation/admin_contenu_page.dart';
+import 'package:flutter/material.dart';
+import '../../features/gamification/presentation/classement_page.dart';
 
 /// Relance les redirections quand l'utilisateur se connecte ou se déconnecte.
 class _RouterRefresh extends ChangeNotifier {
@@ -79,6 +81,7 @@ final routerProvider = Provider<GoRouter>((ref) {
           if (sous('/catalogue') ||
               sous('/mes-formations') ||
               loc == '/formateur' ||
+              loc == '/formateur/' ||
               sous('/formateur/copies') ||
               sous('/formateur/demandes') ||
               loc == '/formateur/formation/nouvelle') {
@@ -255,7 +258,17 @@ final routerProvider = Provider<GoRouter>((ref) {
               ),
             ],
           ),
-          GoRoute(path: '/admin', builder: (_, _) => const AdminPage()),
+          GoRoute(
+            path: '/admin',
+            builder: (context, state) => const AdminPage(),
+            routes: [
+                GoRoute(
+                  path: 'formation/:id/contenu',
+                  builder: (context, state) =>
+                      AdminContenuPage(formationId: state.pathParameters['id']!),
+                ),
+              ],
+            ),
           GoRoute(
             path: '/notifications',
             builder: (_, _) => const NotificationsPage(),
@@ -268,6 +281,10 @@ final routerProvider = Provider<GoRouter>((ref) {
             path: 'certificats',
             builder: (context, state) => const MesCertificatsPage(),
               ),
+            GoRoute(
+              path: 'classement',
+              builder: (context, state) => const ClassementPage(),
+              ),
             ],
           ),
         ],
@@ -275,3 +292,26 @@ final routerProvider = Provider<GoRouter>((ref) {
     ],
   );
 });
+
+/// Page relais : un admin qui retombe sur « /formateur » (retour arrière)
+/// est renvoyé aussitôt vers son espace.
+class _VersAdmin extends StatefulWidget {
+  const _VersAdmin();
+
+  @override
+  State<_VersAdmin> createState() => _VersAdminState();
+}
+
+class _VersAdminState extends State<_VersAdmin> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) context.go('/admin');
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) =>
+      const Scaffold(body: SizedBox.shrink());
+}

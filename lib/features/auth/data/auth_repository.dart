@@ -40,12 +40,12 @@ class AuthRepository {
     if (kIsWeb || Firebase.apps.isEmpty) return;
     try {
       final token = await FirebaseMessaging.instance.getToken().timeout(
-        const Duration(seconds: 4),
+        const Duration(seconds: 2),
       );
       if (token == null) return;
       await _client
           .rpc('unregister_device_token', params: {'p_token': token})
-          .timeout(const Duration(seconds: 4));
+          .timeout(const Duration(seconds: 2));
     } catch (e) {
       debugPrint('Push (retrait du jeton) : $e');
     }

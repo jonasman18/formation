@@ -123,6 +123,14 @@ class _QuizFormState extends ConsumerState<_QuizForm> {
   }
 
   String get _retour => '/formateur/formation/${widget.formationId}/contenu';
+  /// Revient à la page précédente ; repli sur la liste du contenu si la pile est vide.
+  void _revenir(GoRouter router) {
+    if (router.canPop()) {
+      router.pop();
+    } else {
+      router.go(_retour);
+    }
+  }
 
   void _msg(String texte) {
     if (!mounted) return;
@@ -175,7 +183,7 @@ class _QuizFormState extends ConsumerState<_QuizForm> {
       ref.invalidate(modulesProvider(widget.formationId));
       ref.invalidate(quizEditionProvider);
       ref.invalidate(quizProvider);
-      router.go(_retour);
+      _revenir(router);
     } catch (e) {
       _msg(humanError(e));
     } finally {
@@ -213,7 +221,7 @@ class _QuizFormState extends ConsumerState<_QuizForm> {
       ref.invalidate(modulesProvider(widget.formationId));
       ref.invalidate(quizEditionProvider);
       ref.invalidate(quizProvider);
-      router.go(_retour);
+      _revenir(router);
     } catch (e) {
       _msg(humanError(e));
     } finally {

@@ -255,7 +255,7 @@ class _FormationFormState extends ConsumerState<_FormationForm> {
             OutlinedButton.icon(
               onPressed: _busy
                   ? null
-                  : () => context.go(
+                  : () => context.push(
                       '/formateur/formation/${widget.initial!.id}/contenu',
                     ),
               icon: const Icon(Icons.library_books_outlined),

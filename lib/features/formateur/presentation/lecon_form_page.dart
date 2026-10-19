@@ -8,6 +8,7 @@ import '../../../shared/widgets/async_body.dart';
 import '../../cours/domain/cours.dart';
 import '../../cours/presentation/cours_providers.dart';
 import 'formateur_providers.dart';
+import '../../cours/presentation/ouvrir_ressource.dart';
 
 const _tailleMaxOctets = 50 * 1024 * 1024; // limite du plan gratuit Supabase
 
@@ -112,6 +113,15 @@ class _LeconFormState extends ConsumerState<_LeconForm> {
 
   String get _retour => '/formateur/formation/${widget.formationId}/contenu';
 
+  /// Revient à la page précédente ; repli sur la liste du contenu si la pile est vide.
+  void _revenir(GoRouter router) {
+    if (router.canPop()) {
+      router.pop();
+    } else {
+      router.go(_retour);
+    }
+  }
+
   void _msg(String texte) {
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(texte)));
@@ -168,7 +178,9 @@ class _LeconFormState extends ConsumerState<_LeconForm> {
             ),
           ),
         );
-        router.go('$_retour/module/${widget.moduleId}/lecon/$id');
+        router.pushReplacement(
+          '$_retour/module/${widget.moduleId}/lecon/$id',
+        );
       } else {
         await repo.modifierLecon(
           widget.initial!.id,
@@ -176,7 +188,7 @@ class _LeconFormState extends ConsumerState<_LeconForm> {
           contenu: contenu,
         );
         ref.invalidate(modulesProvider(widget.formationId));
-        router.go(_retour);
+        _revenir(router);
       }
     } catch (e) {
       messenger.showSnackBar(SnackBar(content: Text(humanError(e))));
@@ -266,7 +278,7 @@ class _LeconFormState extends ConsumerState<_LeconForm> {
         } catch (_) {}
       }
       ref.invalidate(modulesProvider(widget.formationId));
-      router.go(_retour);
+      _revenir(router);
     } catch (e) {
       _msg(humanError(e));
     } finally {
@@ -339,6 +351,7 @@ class _LeconFormState extends ConsumerState<_LeconForm> {
               Card(
                 margin: const EdgeInsets.only(bottom: 8),
                 child: ListTile(
+                  onTap: () => ouvrirRessource(context, r),
                   leading: Icon(
                     r.type == TypeLecon.video
                         ? Icons.play_circle_outline
@@ -349,7 +362,11 @@ class _LeconFormState extends ConsumerState<_LeconForm> {
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
-                  subtitle: Text(r.type == TypeLecon.video ? 'Vidéo' : 'PDF'),
+                  subtitle: Text(
+                    r.type == TypeLecon.video
+                        ? 'Vidéo · appuyer pour lire'
+                        : 'PDF · appuyer pour ouvrir',
+                  ),
                   trailing: IconButton(
                     icon: const Icon(Icons.delete_outline),
                     onPressed: occupe ? null : () => _retirer(r),

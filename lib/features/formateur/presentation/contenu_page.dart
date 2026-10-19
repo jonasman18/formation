@@ -192,7 +192,7 @@ class ContenuPage extends ConsumerWidget {
                           title: Text(l.titre),
                           subtitle: Text(_resume(l)),
                           trailing: const Icon(Icons.edit_outlined, size: 18),
-                          onTap: () => context.go(
+                          onTap: () => context.push(
                             '/formateur/formation/$formationId/contenu'
                             '/module/${m.id}/lecon/${l.id}',
                           ),
@@ -204,7 +204,7 @@ class ContenuPage extends ConsumerWidget {
                           title: Text(q.titre),
                           subtitle: const Text('Quiz'),
                           trailing: const Icon(Icons.edit_outlined, size: 18),
-                          onTap: () => context.go(
+                          onTap: () => context.push(
                             '/formateur/formation/$formationId/contenu'
                             '/module/${m.id}/quiz/${q.id}',
                           ),
@@ -216,7 +216,7 @@ class ContenuPage extends ConsumerWidget {
                           title: Text(x.titre),
                           subtitle: const Text('Exercice'),
                           trailing: const Icon(Icons.edit_outlined, size: 18),
-                          onTap: () => context.go(
+                          onTap: () => context.push(
                             '/formateur/formation/$formationId/contenu'
                             '/module/${m.id}/exercice/${x.id}',
                           ),
@@ -227,7 +227,7 @@ class ContenuPage extends ConsumerWidget {
                           spacing: 4,
                           children: [
                             TextButton.icon(
-                              onPressed: () => context.go(
+                              onPressed: () => context.push(
                                 '/formateur/formation/$formationId/contenu'
                                 '/module/${m.id}/lecon/nouvelle',
                               ),
@@ -235,7 +235,7 @@ class ContenuPage extends ConsumerWidget {
                               label: const Text('Leçon'),
                             ),
                             TextButton.icon(
-                              onPressed: () => context.go(
+                              onPressed: () => context.push(
                                 '/formateur/formation/$formationId/contenu'
                                 '/module/${m.id}/quiz/nouveau',
                               ),
@@ -243,7 +243,7 @@ class ContenuPage extends ConsumerWidget {
                               label: const Text('Quiz'),
                             ),
                             TextButton.icon(
-                              onPressed: () => context.go(
+                              onPressed: () => context.push(
                                 '/formateur/formation/$formationId/contenu'
                                 '/module/${m.id}/exercice/nouveau',
                               ),

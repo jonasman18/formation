@@ -8,6 +8,7 @@ import '../../../shared/widgets/learner_shell.dart';
 import '../../auth/presentation/auth_providers.dart';
 import '../data/profil_repository.dart';
 import 'package:go_router/go_router.dart';
+import '../../gamification/presentation/carte_points.dart';
 
 class ProfilPage extends ConsumerStatefulWidget {
   const ProfilPage({super.key});
@@ -180,6 +181,8 @@ class _ProfilPageState extends ConsumerState<ProfilPage> {
               Center(child: Chip(label: Text(p?.role.label ?? ''))),
               const SizedBox(height: 24),
               if (p?.role.name == 'apprenant') ...[
+                const CartePoints(),
+                const SizedBox(height: 12),
                 OutlinedButton.icon(
                   onPressed: () => context.push('/profil/certificats'),
                   icon: const Icon(Icons.workspace_premium_outlined),
