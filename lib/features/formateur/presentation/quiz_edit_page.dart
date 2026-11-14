@@ -11,6 +11,7 @@ import 'formateur_providers.dart';
 import '../../../shared/utils/pick_file.dart';
 import '../data/quiz_ia_service.dart';
 
+
 /// Création (quizId == null) ou modification d'un quiz.
 class QuizEditPage extends ConsumerWidget {
   const QuizEditPage({

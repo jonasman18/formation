@@ -9,6 +9,7 @@ import '../../auth/presentation/auth_providers.dart';
 import '../data/profil_repository.dart';
 import 'package:go_router/go_router.dart';
 import '../../gamification/presentation/carte_points.dart';
+import '../../../shared/ui/ui.dart';
 
 class ProfilPage extends ConsumerStatefulWidget {
   const ProfilPage({super.key});
@@ -112,101 +113,96 @@ class _ProfilPageState extends ConsumerState<ProfilPage> {
     }
   }
 
-  @override
+    @override
   Widget build(BuildContext context) {
     final profil = ref.watch(currentProfileProvider);
     final email = ref.watch(supabaseClientProvider).auth.currentUser?.email;
+    final theme = Theme.of(context);
 
-    return Scaffold(
-      appBar: AppBar(leading: const MenuButton(), title: const Text('Profil')),
-      body: profil.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(child: Text('Erreur : $e')),
-        data: (p) {
-          final aUnePhoto = p?.avatarUrl != null && p!.avatarUrl!.isNotEmpty;
-          return ListView(
-            padding: const EdgeInsets.all(24),
-            children: [
-              Center(
-                child: GestureDetector(
-                  onTap: _envoi ? null : () => _menuPhoto(aUnePhoto),
-                  child: Stack(
-                    alignment: Alignment.center,
-                    children: [
-                      AvatarUtilisateur(
-                        nomComplet: p?.fullName ?? '',
-                        url: p?.avatarUrl,
-                        rayon: 52,
-                      ),
-                      if (_envoi)
-                        const SizedBox(
-                          width: 104,
-                          height: 104,
-                          child: CircularProgressIndicator(),
-                        ),
-                      Positioned(
-                        right: 0,
-                        bottom: 0,
-                        child: CircleAvatar(
-                          radius: 16,
-                          backgroundColor: Theme.of(context)
-                              .colorScheme
-                              .primary,
-                          child: Icon(
-                            Icons.edit,
-                            size: 16,
-                            color: Theme.of(context).colorScheme.onPrimary,
-                          ),
-                        ),
-                      ),
-                    ],
+    return PageAsync(
+      titre: 'Profil',
+      leading: const MenuButton(),
+      value: profil,
+      onRetry: () => ref.invalidate(currentProfileProvider),
+      enfants: (p) {
+        final aUnePhoto = p?.avatarUrl != null && p!.avatarUrl!.isNotEmpty;
+        return [
+          Center(
+            child: GestureDetector(
+              onTap: _envoi ? null : () => _menuPhoto(aUnePhoto),
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  AvatarUtilisateur(
+                    nomComplet: p?.fullName ?? '',
+                    url: p?.avatarUrl,
+                    rayon: 52,
                   ),
-                ),
-              ),
-              const SizedBox(height: 16),
-              Center(
-                child: Text(
-                  p?.fullName ?? '',
-                  style: Theme.of(context).textTheme.titleLarge,
-                ),
-              ),
-              if (email != null)
-                Center(
-                  child: Text(
-                    email,
-                    style: Theme.of(context).textTheme.bodyMedium,
+                  if (_envoi)
+                    const SizedBox(
+                      width: 104,
+                      height: 104,
+                      child: CircularProgressIndicator(),
+                    ),
+                  Positioned(
+                    right: 0,
+                    bottom: 0,
+                    child: CircleAvatar(
+                      radius: 16,
+                      backgroundColor: theme.colorScheme.primary,
+                      child: Icon(
+                        Icons.edit,
+                        size: 16,
+                        color: theme.colorScheme.onPrimary,
+                      ),
+                    ),
                   ),
-                ),
-              const SizedBox(height: 8),
-              Center(child: Chip(label: Text(p?.role.label ?? ''))),
-              const SizedBox(height: 24),
-              if (p?.role.name == 'apprenant') ...[
-                const CartePoints(),
-                const SizedBox(height: 12),
-                OutlinedButton.icon(
-                  onPressed: () => context.push('/profil/certificats'),
-                  icon: const Icon(Icons.workspace_premium_outlined),
-                  label: const Text('Mes certificats'),
-                ),
-                const SizedBox(height: 12),
-              ],
-              OutlinedButton.icon(
-                onPressed: p == null
-                    ? null
-                    : () => _modifierNom(p.nom ?? '', p.prenom ?? ''),
-                icon: const Icon(Icons.badge_outlined),
-                label: const Text('Modifier mon nom'),
+                ],
               ),
-              const SizedBox(height: 12),
-              OutlinedButton.icon(
-                onPressed: () => ref.read(authRepositoryProvider).signOut(),
-                icon: const Icon(Icons.logout),
-                label: const Text('Se déconnecter'),
+            ),
+          ),
+          const SizedBox(height: Esp.l),
+          Center(
+            child: Text(p?.fullName ?? '', style: theme.textTheme.titleLarge),
+          ),
+          if (email != null)
+            Center(
+              child: Text(
+                email,
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
               ),
-            ],
-          );
-        },
-      ),
+            ),
+          const SizedBox(height: Esp.s),
+          Center(child: Pastille(p?.role.label ?? '', ton: Ton.info)),
+          const SizedBox(height: Esp.xl),
+          if (p?.role.name == 'apprenant') ...[
+            const CartePoints(),
+            const SizedBox(height: Esp.m),
+            OutlinedButton.icon(
+              onPressed: () => context.push('/profil/certificats'),
+              icon: const Icon(Icons.workspace_premium_outlined),
+              label: const Text('Mes certificats'),
+            ),
+            const SizedBox(height: Esp.m),
+          ],
+
+          OutlinedButton.icon(
+            onPressed: p == null
+                ? null
+                : () => _modifierNom(p.nom ?? '', p.prenom ?? ''),
+            icon: const Icon(Icons.badge_outlined),
+            label: const Text('Modifier mon nom'),
+          ),
+          const SizedBox(height: Esp.m),
+          OutlinedButton.icon(
+            onPressed: () => ref.read(authRepositoryProvider).signOut(),
+            icon: const Icon(Icons.logout),
+            label: const Text('Se déconnecter'),
+          ),
+        ];
+      },
     );
   }
 }

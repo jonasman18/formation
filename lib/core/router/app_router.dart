@@ -31,6 +31,8 @@ import '../../features/examen/presentation/examen_page.dart';
 import '../../features/admin/presentation/admin_contenu_page.dart';
 import 'package:flutter/material.dart';
 import '../../features/gamification/presentation/classement_page.dart';
+import '../../features/suivi/presentation/suivi_page.dart';
+import '../../features/suivi/presentation/suivi_detail_page.dart';
 
 /// Relance les redirections quand l'utilisateur se connecte ou se déconnecte.
 class _RouterRefresh extends ChangeNotifier {
@@ -200,6 +202,20 @@ final routerProvider = Provider<GoRouter>((ref) {
                     path: 'examen',
                     builder: (context, state) =>
                         ExamenEditPage(formationId: state.pathParameters['id']!),
+                  ),
+                                    GoRoute(
+                    path: 'suivi',
+                    builder: (context, state) =>
+                        SuiviPage(formationId: state.pathParameters['id']!),
+                    routes: [
+                      GoRoute(
+                        path: ':apprenantId',
+                        builder: (context, state) => SuiviDetailPage(
+                          formationId: state.pathParameters['id']!,
+                          apprenantId: state.pathParameters['apprenantId']!,
+                        ),
+                      ),
+                    ],
                   ),
                   GoRoute(
                     path: 'contenu',

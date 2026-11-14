@@ -7,6 +7,7 @@ import '../../../shared/utils/errors.dart';
 import '../../../shared/widgets/auth_field.dart';
 import 'auth_providers.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import '../../../core/theme/theme_mode.dart';
 
 final _emailValide = RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$');
 
@@ -112,58 +113,81 @@ class _LoginPageState extends ConsumerState<LoginPage> {
     }
   }
 
-  @override
+    @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
 
     return Scaffold(
-      body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              Color.alphaBlend(scheme.primary.withAlpha(38), scheme.surface),
-              scheme.surface,
-              Color.alphaBlend(scheme.tertiary.withAlpha(26), scheme.surface),
-            ],
-          ),
-        ),
-        child: SafeArea(
-          child: Center(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(24),
-              keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 420),
-                child: TweenAnimationBuilder<double>(
-                  tween: Tween(begin: 0, end: 1),
-                  duration: const Duration(milliseconds: 500),
-                  curve: Curves.easeOutCubic,
-                  builder: (context, v, child) => Opacity(
-                    opacity: v,
-                    child: Transform.translate(
-                      offset: Offset(0, 16 * (1 - v)),
-                      child: child,
+      body: Stack(
+        children: [
+          Positioned.fill(
+            child: Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    Color.alphaBlend(
+                      scheme.primary.withAlpha(38),
+                      scheme.surface,
                     ),
-                  ),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      _buildHeader(theme, scheme),
-                      const SizedBox(height: 32),
-                      _buildCard(theme, scheme),
-                      const SizedBox(height: 16),
-                      _buildRegisterLink(theme, scheme),
-                    ],
+                    scheme.surface,
+                    Color.alphaBlend(
+                      scheme.tertiary.withAlpha(26),
+                      scheme.surface,
+                    ),
+                  ],
+                ),
+              ),
+              child: SafeArea(
+                child: Center(
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.all(24),
+                    keyboardDismissBehavior:
+                        ScrollViewKeyboardDismissBehavior.onDrag,
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: 420),
+                      child: TweenAnimationBuilder<double>(
+                        tween: Tween(begin: 0, end: 1),
+                        duration: const Duration(milliseconds: 500),
+                        curve: Curves.easeOutCubic,
+                        builder: (context, v, child) => Opacity(
+                          opacity: v,
+                          child: Transform.translate(
+                            offset: Offset(0, 16 * (1 - v)),
+                            child: child,
+                          ),
+                        ),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            _buildHeader(theme, scheme),
+                            const SizedBox(height: 32),
+                            _buildCard(theme, scheme),
+                            const SizedBox(height: 16),
+                            _buildRegisterLink(theme, scheme),
+                          ],
+                        ),
+                      ),
+                    ),
                   ),
                 ),
               ),
             ),
           ),
-        ),
+          // Bouton lune / soleil, toujours visible en haut à droite.
+          const SafeArea(
+            child: Align(
+              alignment: Alignment.topRight,
+              child: Padding(
+                padding: EdgeInsets.all(8),
+                child: BoutonTheme(),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

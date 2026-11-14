@@ -262,6 +262,16 @@ class _FormationFormState extends ConsumerState<_FormationForm> {
               label: const Text('Gérer les modules et leçons'),
             ),
             const SizedBox(height: 8),
+                        OutlinedButton.icon(
+              onPressed: _busy
+                  ? null
+                  : () => context.push(
+                      '/formateur/formation/${widget.initial!.id}/suivi',
+                    ),
+              icon: const Icon(Icons.groups_outlined),
+              label: const Text('Suivre les apprenants'),
+            ),
+            const SizedBox(height: 8),
             OutlinedButton.icon(
               onPressed: () => context.go(
                 '/formateur/formation/${widget.initial!.id}/annonces',

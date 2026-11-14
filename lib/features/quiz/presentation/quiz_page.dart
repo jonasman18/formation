@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../shared/utils/errors.dart';
+import '../../../shared/utils/lettres.dart';
 import '../../../shared/widgets/async_body.dart';
 import '../domain/quiz.dart';
 import 'quiz_providers.dart';
@@ -123,24 +124,28 @@ class _QuizPageState extends ConsumerState<QuizPage> {
                       style: theme.textTheme.titleMedium,
                     ),
                   ),
-                  for (final c in quiz.questions[i].choix)
-                    CheckboxListTile(
-                      controlAffinity: ListTileControlAffinity.leading,
-                      title: Text(c.texte),
-                      value: (_reponses[quiz.questions[i].id] ?? {}).contains(
-                        c.id,
-                      ),
-                      onChanged: (v) => setState(() {
-                        final set = _reponses.putIfAbsent(
-                          quiz.questions[i].id,
-                          () => <String>{},
+                                    for (var k = 0; k < quiz.questions[i].choix.length; k++)
+                    Builder(
+                      builder: (_) {
+                        final c = quiz.questions[i].choix[k];
+                        return CheckboxListTile(
+                          controlAffinity: ListTileControlAffinity.leading,
+                          title: Text('${lettreChoix(k)}. ${c.texte}'),
+                          value: (_reponses[quiz.questions[i].id] ?? {})
+                              .contains(c.id),
+                          onChanged: (v) => setState(() {
+                            final set = _reponses.putIfAbsent(
+                              quiz.questions[i].id,
+                              () => <String>{},
+                            );
+                            if (v == true) {
+                              set.add(c.id);
+                            } else {
+                              set.remove(c.id);
+                            }
+                          }),
                         );
-                        if (v == true) {
-                          set.add(c.id);
-                        } else {
-                          set.remove(c.id);
-                        }
-                      }),
+                      },
                     ),
                 ],
               ),

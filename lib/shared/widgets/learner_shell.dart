@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../core/theme/theme_mode.dart';
 import '../../features/auth/presentation/auth_providers.dart';
 import '../../features/notifications/presentation/notifications_providers.dart';
 import 'avatar_utilisateur.dart';
@@ -121,49 +122,63 @@ class LearnerShell extends ConsumerWidget {
         },
         children: [
           Padding(
-            padding: const EdgeInsets.fromLTRB(28, 24, 16, 12),
+            padding: const EdgeInsets.fromLTRB(28, 16, 8, 12),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
-                  'Formation',
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
+                // Titre + bouton lune / soleil (bascule rapide clair / sombre).
+                Row(
+                  children: [
+                    const Expanded(
+                      child: Text(
+                        'Formation',
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                    const BoutonTheme(),
+                  ],
                 ),
                 if (profil != null) ...[
-                  const SizedBox(height: 12),
-                  InkWell(
-                    borderRadius: BorderRadius.circular(8),
-                    onTap: () {
-                      shellScaffoldKey.currentState?.closeDrawer();
-                      context.go('/profil');
-                    },
-                    child: Row(
-                      children: [
-                        AvatarUtilisateur(
-                          nomComplet: profil.fullName,
-                          url: profil.avatarUrl,
-                          rayon: 22,
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                profil.fullName,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: Theme.of(context).textTheme.titleSmall,
-                              ),
-                              Text(
-                                profil.role.label,
-                                style: Theme.of(context).textTheme.bodySmall,
-                              ),
-                              const LignePoints(),
-                            ],
+                  const SizedBox(height: 8),
+                  Padding(
+                    padding: const EdgeInsets.only(right: 8),
+                    child: InkWell(
+                      borderRadius: BorderRadius.circular(8),
+                      onTap: () {
+                        shellScaffoldKey.currentState?.closeDrawer();
+                        context.go('/profil');
+                      },
+                      child: Row(
+                        children: [
+                          AvatarUtilisateur(
+                            nomComplet: profil.fullName,
+                            url: profil.avatarUrl,
+                            rayon: 22,
                           ),
-                        ),
-                      ],
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  profil.fullName,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: Theme.of(context).textTheme.titleSmall,
+                                ),
+                                Text(
+                                  profil.role.label,
+                                  style: Theme.of(context).textTheme.bodySmall,
+                                ),
+                                const LignePoints(),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ],

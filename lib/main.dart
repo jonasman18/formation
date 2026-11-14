@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'core/theme/app_theme.dart';
+import 'core/theme/theme_mode.dart';
 
 import 'core/config/env.dart';
 import 'core/router/app_router.dart';
@@ -47,13 +49,9 @@ class FormationApp extends ConsumerWidget {
       title: 'Formation',
       debugShowCheckedModeBanner: false,
       scaffoldMessengerKey: messengerKey,
-      theme: ThemeData(
-        useMaterial3: true,
-        colorSchemeSeed: const Color(0xFF1F4E79),
-        inputDecorationTheme: const InputDecorationTheme(
-          border: OutlineInputBorder(),
-        ),
-      ),
+      theme: AppTheme.light,
+      darkTheme: AppTheme.dark,
+      themeMode: ref.watch(themeModeProvider),
       routerConfig: ref.watch(routerProvider),
     );
   }

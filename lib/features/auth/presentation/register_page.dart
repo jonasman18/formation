@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import '../../../shared/utils/errors.dart';
 import '../../../shared/widgets/auth_field.dart';
 import 'auth_providers.dart';
+import '../../../core/theme/theme_mode.dart';
 
 final _emailValide = RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$');
 
@@ -159,6 +160,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
         elevation: 0,
         scrolledUnderElevation: 0,
         leading: BackButton(onPressed: () => context.go('/login')),
+        actions: const [BoutonTheme()],
       ),
       body: Container(
         decoration: BoxDecoration(
