@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 /// Thème unique de l'application (clair et sombre bleu marine).
 /// Les pages n'ont plus besoin de styler cartes, boutons et champs.
@@ -65,12 +66,22 @@ class AppTheme {
         titleSmall: texte.titleSmall?.copyWith(fontWeight: FontWeight.w600),
       ),
       // Transparente : le dégradé de la page passe derrière la barre.
-      appBarTheme: const AppBarTheme(
+      appBarTheme: AppBarTheme(
         centerTitle: false,
         backgroundColor: Colors.transparent,
         surfaceTintColor: Colors.transparent,
         scrolledUnderElevation: 0,
         elevation: 0,
+        systemOverlayStyle: SystemUiOverlayStyle(
+          statusBarColor: Colors.transparent,
+          statusBarIconBrightness:
+              brightness == Brightness.dark ? Brightness.light : Brightness.dark,
+          statusBarBrightness:
+              brightness == Brightness.dark ? Brightness.dark : Brightness.light,
+          systemNavigationBarColor: cs.surface,
+          systemNavigationBarIconBrightness:
+              brightness == Brightness.dark ? Brightness.light : Brightness.dark,
+        ),
       ),
       cardTheme: CardThemeData(
         elevation: 0,

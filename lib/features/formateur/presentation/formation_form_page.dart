@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../shared/ui/ui.dart';
 import '../../../shared/utils/errors.dart';
 import '../../../shared/widgets/async_body.dart';
 import '../../catalogue/presentation/catalogue_providers.dart';
@@ -18,24 +19,28 @@ class FormationFormPage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final categories = ref.watch(categoriesProvider);
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(formationId == null ? 'Nouvelle formation' : 'Modifier'),
-      ),
-      body: AsyncBody<List<CategorieOption>>(
-        value: categories,
-        onRetry: () => ref.invalidate(categoriesProvider),
-        data: (cats) {
-          if (formationId == null) {
-            return _FormationForm(categories: cats);
-          }
-          final formation = ref.watch(formationGereeProvider(formationId!));
-          return AsyncBody<FormationGeree>(
-            value: formation,
-            onRetry: () => ref.invalidate(formationGereeProvider(formationId!)),
-            data: (f) => _FormationForm(categories: cats, initial: f),
-          );
-        },
+    return FondDegrade(
+      child: Scaffold(
+        backgroundColor: Colors.transparent,
+        appBar: AppBar(
+          title: Text(formationId == null ? 'Nouvelle formation' : 'Modifier'),
+        ),
+        body: AsyncBody<List<CategorieOption>>(
+          value: categories,
+          onRetry: () => ref.invalidate(categoriesProvider),
+          data: (cats) {
+            if (formationId == null) {
+              return _FormationForm(categories: cats);
+            }
+            final formation = ref.watch(formationGereeProvider(formationId!));
+            return AsyncBody<FormationGeree>(
+              value: formation,
+              onRetry: () =>
+                  ref.invalidate(formationGereeProvider(formationId!)),
+              data: (f) => _FormationForm(categories: cats, initial: f),
+            );
+          },
+        ),
       ),
     );
   }
@@ -159,8 +164,9 @@ class _FormationFormState extends ConsumerState<_FormationForm> {
       router.go('/formateur');
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text(humanError(e))));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(humanError(e))),
+        );
       }
     } finally {
       if (mounted) setState(() => _busy = false);
@@ -170,133 +176,308 @@ class _FormationFormState extends ConsumerState<_FormationForm> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return Form(
-      key: _formKey,
-      child: ListView(
-        padding: const EdgeInsets.all(16),
-        children: [
-          TextFormField(
-            controller: _titre,
-            decoration: const InputDecoration(
-              labelText: 'Titre',
-              border: OutlineInputBorder(),
-            ),
-            textCapitalization: TextCapitalization.sentences,
-            validator: (v) => (v == null || v.trim().isEmpty)
-                ? 'Le titre est obligatoire'
-                : null,
-          ),
-          const SizedBox(height: 16),
-          TextFormField(
-            controller: _description,
-            decoration: const InputDecoration(
-              labelText: 'Description',
-              border: OutlineInputBorder(),
-              alignLabelWithHint: true,
-            ),
-            minLines: 4,
-            maxLines: 8,
-            textCapitalization: TextCapitalization.sentences,
-          ),
-          const SizedBox(height: 16),
-          DropdownMenu<String?>(
-            expandedInsets: EdgeInsets.zero,
-            label: const Text('Catégorie'),
-            initialSelection: _categorieId,
-            onSelected: (v) => _categorieId = v,
-            dropdownMenuEntries: [
-              const DropdownMenuEntry<String?>(value: null, label: 'Aucune'),
-              for (final c in widget.categories)
-                DropdownMenuEntry<String?>(value: c.id, label: c.nom),
-            ],
-          ),
-          const SizedBox(height: 24),
-          Text('Statut', style: theme.textTheme.titleSmall),
-          const SizedBox(height: 8),
-          SegmentedButton<String>(
-            segments: const [
-              ButtonSegment(value: 'brouillon', label: Text('Brouillon')),
-              ButtonSegment(value: 'publie', label: Text('Publiée')),
-              ButtonSegment(value: 'archive', label: Text('Archivée')),
-            ],
-            selected: {_statut},
-            onSelectionChanged: (s) => setState(() => _statut = s.first),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            'Seules les formations « Publiée » apparaissent dans le catalogue.',
-            style: theme.textTheme.bodySmall,
-          ),
-          if (widget.initial != null) ...[
-            const SizedBox(height: 16),
-            AccesFormationSwitch(formationId: widget.initial!.id),
-          ],
-          const SizedBox(height: 24),
-          if (widget.initial == null)
-            Padding(
-              padding: const EdgeInsets.only(bottom: 12),
-              child: Text(
-                'Après l\'enregistrement, vous pourrez ajouter des modules et des leçons.',
-                style: theme.textTheme.bodySmall,
-              ),
-            ),
-          FilledButton(
-            onPressed: _busy ? null : _enregistrer,
-            child: _busy
-                ? const SizedBox(
-                    height: 20,
-                    width: 20,
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  )
-                : const Text('Enregistrer'),
-          ),
-          if (widget.initial != null) ...[
-            const SizedBox(height: 8),
-            OutlinedButton.icon(
-              onPressed: _busy
-                  ? null
-                  : () => context.push(
-                      '/formateur/formation/${widget.initial!.id}/contenu',
+    final cs = theme.colorScheme;
+    final edition = widget.initial != null;
+    final id = widget.initial?.id;
+
+    return Column(
+      children: [
+        Expanded(
+          child: Align(
+            alignment: Alignment.topCenter,
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 720),
+              child: Form(
+                key: _formKey,
+                 child: ListView(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: Esp.page,
+                    vertical: Esp.l,
+                  ),
+                  keyboardDismissBehavior:
+                      ScrollViewKeyboardDismissBehavior.onDrag,
+                  children: [
+                    // ── Destinations (modification uniquement) ──
+                    if (edition) ...[
+                      Text(
+                        'Gérer cette formation',
+                        style: theme.textTheme.titleMedium,
+                      ),
+                      const SizedBox(height: Esp.s),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: _Tuile(
+                              icone: Icons.library_books_outlined,
+                              label: 'Modules et leçons',
+                              onTap: _busy
+                                  ? null
+                                  : () => context.push(
+                                      '/formateur/formation/$id/contenu',
+                                    ),
+                            ),
+                          ),
+                          const SizedBox(width: Esp.m),
+                          Expanded(
+                            child: _Tuile(
+                              icone: Icons.groups_outlined,
+                              label: 'Apprenants',
+                              onTap: _busy
+                                  ? null
+                                  : () => context.push(
+                                      '/formateur/formation/$id/suivi',
+                                    ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: Esp.m),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: _Tuile(
+                              icone: Icons.campaign_outlined,
+                              label: 'Annonces',
+                              onTap: _busy
+                                  ? null
+                                  : () => context.push(
+                                      '/formateur/formation/$id/annonces',
+                                    ),
+                            ),
+                          ),
+                          const SizedBox(width: Esp.m),
+                          Expanded(
+                            child: _Tuile(
+                              icone: Icons.assignment_outlined,
+                              label: 'Examen final',
+                              onTap: _busy
+                                  ? null
+                                  : () => context.push(
+                                      '/formateur/formation/$id/examen',
+                                    ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: Esp.xl),
+                    ],
+
+                    // ── Informations ──
+                    CarteSection(
+                      titre: 'Informations',
+                      icone: Icons.edit_note_outlined,
+                      enfants: [
+                        TextFormField(
+                          controller: _titre,
+                          decoration: const InputDecoration(labelText: 'Titre'),
+                          textCapitalization: TextCapitalization.sentences,
+                          validator: (v) => (v == null || v.trim().isEmpty)
+                              ? 'Le titre est obligatoire'
+                              : null,
+                        ),
+                        const SizedBox(height: Esp.l),
+                        TextFormField(
+                          controller: _description,
+                          decoration: const InputDecoration(
+                            labelText: 'Description',
+                            alignLabelWithHint: true,
+                          ),
+                          minLines: 1,
+                          maxLines: 8,
+                          textCapitalization: TextCapitalization.sentences,
+                        ),
+                        const SizedBox(height: Esp.l),
+                        SizedBox(
+                          width: double.infinity,
+                          child: DropdownMenu<String?>(
+                            expandedInsets: EdgeInsets.zero,
+                            label: const Text('Catégorie'),
+                            initialSelection: _categorieId,
+                            onSelected: (v) => _categorieId = v,
+                            dropdownMenuEntries: [
+                              const DropdownMenuEntry<String?>(
+                                value: null,
+                                label: 'Aucune',
+                              ),
+                              for (final c in widget.categories)
+                                DropdownMenuEntry<String?>(
+                                  value: c.id,
+                                  label: c.nom,
+                                ),
+                            ],
+                          ),
+                        ),
+                      ],
                     ),
-              icon: const Icon(Icons.library_books_outlined),
-              label: const Text('Gérer les modules et leçons'),
-            ),
-            const SizedBox(height: 8),
-                        OutlinedButton.icon(
-              onPressed: _busy
-                  ? null
-                  : () => context.push(
-                      '/formateur/formation/${widget.initial!.id}/suivi',
+
+                    // ── Publication ──
+                    CarteSection(
+                      titre: 'Publication',
+                      icone: Icons.public,
+                      enfants: [
+                        SizedBox(
+                          width: double.infinity,
+                          child: SegmentedButton<String>(
+                            segments: const [
+                              ButtonSegment(
+                                value: 'brouillon',
+                                label: Text('Brouillon'),
+                              ),
+                              ButtonSegment(
+                                value: 'publie',
+                                label: Text('Publiée'),
+                              ),
+                              ButtonSegment(
+                                value: 'archive',
+                                label: Text('Archivée'),
+                              ),
+                            ],
+                            selected: {_statut},
+                            onSelectionChanged: (s) =>
+                                setState(() => _statut = s.first),
+                          ),
+                        ),
+                        const SizedBox(height: Esp.s),
+                        Text(
+                          'Seules les formations « Publiée » apparaissent dans le catalogue.',
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: cs.onSurfaceVariant,
+                          ),
+                        ),
+                        if (edition) ...[
+                          const SizedBox(height: Esp.m),
+                          AccesFormationSwitch(formationId: id!),
+                        ],
+                      ],
                     ),
-              icon: const Icon(Icons.groups_outlined),
-              label: const Text('Suivre les apprenants'),
-            ),
-            const SizedBox(height: 8),
-            OutlinedButton.icon(
-              onPressed: () => context.go(
-                '/formateur/formation/${widget.initial!.id}/annonces',
+
+                    if (!edition)
+                      Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                        ),
+                        child: Text(
+                          'Après l\'enregistrement, vous pourrez ajouter des modules et des leçons.',
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: cs.onSurfaceVariant,
+                          ),
+                        ),
+                      ),
+
+                    // ── Zone dangereuse (à part, tout en bas) ──
+                    if (edition) ...[
+                      const SizedBox(height: Esp.xl),
+                      OutlinedButton.icon(
+                        onPressed: _busy ? null : _supprimer,
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: cs.error,
+                          side: BorderSide(
+                            color: cs.error.withValues(alpha: 0.5),
+                          ),
+                        ),
+                        icon: const Icon(Icons.delete_outline),
+                        label: const Text('Supprimer la formation'),
+                      ),
+                    ],
+                  ],
+                ),
               ),
-              icon: const Icon(Icons.campaign_outlined),
-              label: const Text('Annonces aux inscrits'),
             ),
-            const SizedBox(height: 8,),
-            OutlinedButton.icon(
-            onPressed: () =>
-            context.push('/formateur/formation/${widget.initial!.id}/examen'),
-            icon: const Icon(Icons.assignment_outlined),
-            label: const Text('Examen final'),
+          ),
+        ),
+
+        // ── Barre fixe : Enregistrer toujours visible ──
+        _BarreEnregistrer(
+          label: edition ? 'Enregistrer' : 'Créer la formation',
+          chargement: _busy,
+          onPressed: _enregistrer,
+        ),
+      ],
+    );
+  }
+}
+
+/// Tuile de navigation : icône + libellé.
+class _Tuile extends StatelessWidget {
+  const _Tuile({required this.icone, required this.label, this.onTap});
+
+  final IconData icone;
+  final String label;
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Card(
+      margin: EdgeInsets.zero,
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: onTap,
+        child: SizedBox(
+          height: 100,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: Esp.s),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(icone, size: 26, color: theme.colorScheme.primary),
+                const SizedBox(height: Esp.s),
+                Text(
+                  label,
+                  textAlign: TextAlign.center,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: theme.textTheme.labelLarge,
+                ),
+              ],
             ),
-            const SizedBox(height: 8),
-            TextButton.icon(
-              onPressed: _busy ? null : _supprimer,
-              icon: Icon(Icons.delete_outline, color: theme.colorScheme.error),
-              label: Text(
-                'Supprimer la formation',
-                style: TextStyle(color: theme.colorScheme.error),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Barre du bas, fixe : bouton principal du formulaire.
+class _BarreEnregistrer extends StatelessWidget {
+  const _BarreEnregistrer({
+    required this.label,
+    required this.chargement,
+    required this.onPressed,
+  });
+
+  final String label;
+  final bool chargement;
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: cs.surfaceContainerLow,
+        border: Border(top: BorderSide(color: cs.outlineVariant)),
+      ),
+      child: SafeArea(
+        top: false,
+        child: Padding(
+          padding: const EdgeInsets.all(Esp.m),
+          child: Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 720),
+              child: SizedBox(
+                width: double.infinity,
+                child: BoutonChargement(
+                  label: label,
+                  icone: Icons.save_outlined,
+                  labelChargement: 'Enregistrement…',
+                  chargement: chargement,
+                  onPressed: onPressed,
+                ),
               ),
             ),
-          ],
-        ],
+          ),
+        ),
       ),
     );
   }

@@ -14,6 +14,7 @@ class Esp {
   static const double m = 12;
   static const double l = 16;
   static const double xl = 24;
+  static const double page = 10;
 }
 
 /// Fond en dégradé identique à celui de la page de connexion.
@@ -50,7 +51,7 @@ Widget _corps({
   double largeurMax = 720,
 }) {
   final liste = ListView.builder(
-    padding: EdgeInsets.fromLTRB(Esp.l, Esp.l, Esp.l, fab ? 88 : Esp.xl),
+    padding: EdgeInsets.fromLTRB(Esp.page, Esp.l, Esp.page, fab ? 88 : Esp.xl),
     physics: onRefresh == null ? null : const AlwaysScrollableScrollPhysics(),
     keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
     itemCount: enfants.length,
@@ -144,7 +145,7 @@ class PageAsync<T> extends StatelessWidget {
           children: [
             if (haut != null)
               Padding(
-                padding: const EdgeInsets.fromLTRB(Esp.l, Esp.m, Esp.l, 0),
+                padding: const EdgeInsets.fromLTRB(Esp.page, Esp.m, Esp.page, 0),
                 child: haut,
               ),
             Expanded(
